@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "font": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+  "mono_font": "ui-monospace, SFMono-Regular, Menlo, Consolas, \"Liberation Mono\", monospace",
+  "radius_px": 8,
+  "light": {
+    "background": "#f6f7f8",
+    "surface": "#ffffff",
+    "text": "#1c2328",
+    "muted": "#5d6973",
+    "border": "#d9dee2",
+    "primary": "#0f5c63",
+    "accent": "#a8572a",
+    "series": [
+      "#0f5c63",
+      "#a8572a",
+      "#22558f",
+      "#1d7a46",
+      "#8a5a00",
+      "#b3261e",
+      "#5d6973"
+    ]
+  },
+  "dark": {
+    "background": "#12171b",
+    "surface": "#1a2126",
+    "text": "#e6eaed",
+    "muted": "#9aa6af",
+    "border": "#2f3a41",
+    "primary": "#4fb3bb",
+    "accent": "#e0915f",
+    "series": [
+      "#4fb3bb",
+      "#e0915f",
+      "#85b4ec",
+      "#5cc98a",
+      "#e8b84f",
+      "#f08a80",
+      "#9aa6af"
+    ]
+  }
+}

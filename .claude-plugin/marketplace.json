@@ -1,0 +1,15 @@
+{
+  "name": "samovar-data",
+  "description": "Samovar Data plugins for Claude Code.",
+  "owner": {
+    "name": "Samovar Data",
+    "url": "https://samovardata.ru"
+  },
+  "plugins": [
+    {
+      "name": "samovar-agent",
+      "source": "./",
+      "description": "Plain-language analytics over your Samovar Data."
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "name": "samovar-agent",
+  "displayName": "Samovar Data analyst",
+  "version": "0.1.0",
+  "description": "Ask questions about your Samovar Data in plain language: guarded DuckDB SQL over your detail and mart layers, tables, charts and CSV/JSON/XLSX exports.",
+  "author": {
+    "name": "Samovar Data",
+    "url": "https://samovardata.ru"
+  },
+  "homepage": "https://samovardata.ru",
+  "repository": "https://github.com/samovar-data/samovar-agent",
+  "license": "BUSL-1.1",
+  "keywords": ["analytics", "duckdb", "yandex-metrika", "amocrm", "samovar-data"],
+  "userConfig": {
+    "s3_key_id": {
+      "type": "string",
+      "title": "S3 key: Access Key ID",
+      "description": "A read-only S3 key an admin creates in the Samovar Data cabinet (S3 keys). Stored in the system keychain.",
+      "sensitive": true
+    },
+    "s3_secret": {
+      "type": "string",
+      "title": "S3 key: Secret Access Key",
+      "description": "The secret shown once with the key in the cabinet. Stored in the system keychain.",
+      "sensitive": true
+    },
+    "s3_bucket": {
+      "type": "string",
+      "title": "S3 key: bucket",
+      "description": "The bucket shown with the key in the cabinet."
+    },
+    "s3_endpoint": {
+      "type": "string",
+      "title": "S3 key: endpoint",
+      "description": "The endpoint shown with the key in the cabinet.",
+      "default": "https://s3.cloud.ru"
+    },
+    "s3_region": {
+      "type": "string",
+      "title": "S3 key: region",
+      "description": "The region shown with the key in the cabinet.",
+      "default": "ru-central-1"
+    },
+    "api_url": {
+      "type": "string",
+      "title": "Platform URL",
+      "description": "Samovar Data site; the descriptions of tables and columns are read from its public catalog (/api/v1/catalog), as in the cabinet.",
+      "default": "https://samovardata.ru"
+    },
+    "output_dir": {
+      "type": "string",
+      "title": "Output folder",
+      "description": "Where charts and exports are written, relative to the project folder.",
+      "default": "samovar-output"
+    }
+  }
+}

@@ -1,0 +1,1 @@
+SELECT count(*) AS n FROM dds.outside WHERE dt BETWEEN DATE '2026-10-21' AND DATE '2026-10-21'

@@ -1,0 +1,2473 @@
+{
+  "source": {
+    "code": "yandex_metrika_logs_api",
+    "title": "Яндекс Метрика — Logs API",
+    "connector_version": 6,
+    "tags": [
+      "метрика",
+      "веб-аналитика"
+    ]
+  },
+  "sources": [
+    {
+      "code": "yandex_metrika_logs_api",
+      "title": "Яндекс Метрика — Logs API",
+      "connector_version": 6,
+      "tags": [
+        "метрика",
+        "веб-аналитика"
+      ]
+    },
+    {
+      "code": "amocrm",
+      "title": "amoCRM — API v4",
+      "connector_version": 1,
+      "tags": [
+        "amocrm",
+        "crm"
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "id": "dds",
+      "title": "Детальный слой (DDS)",
+      "schema": "dds",
+      "summary": "Строки в том виде, в каком их отдаёт источник, но только из разрешённого списка полей и с проверенными типами. Одна строка — один визит или одно событие. Подходит для любых срезов, которых нет в витринах."
+    },
+    {
+      "id": "mart",
+      "title": "Витрины",
+      "schema": "mart",
+      "summary": "Дневные агрегаты, собранные из проверенной загрузки детального слоя. Компактны, быстро читаются и подходят для отчётов и дашбордов."
+    }
+  ],
+  "groups": {
+    "key": "Ключ",
+    "time": "Время",
+    "pages": "Страницы и URL",
+    "behaviour": "Поведение",
+    "geo": "География",
+    "goals": "Цели",
+    "attribution": "Атрибуция",
+    "utm": "UTM-метки",
+    "device": "Устройство",
+    "measure": "Мера",
+    "tech": "Техническое",
+    "crm": "Сделка и воронка",
+    "people": "Сотрудники и контакты",
+    "dictionary": "Справочник"
+  },
+  "excluded": [
+    {
+      "what": "ClientID (ym:s:clientID) и хэш UserID (ym:s:counterUserIDHash)",
+      "why": "Устойчивый идентификатор посетителя: по нему можно склеить поведение одного человека. Это персональные данные."
+    },
+    {
+      "what": "IP-адрес (ym:s:ipAddress)",
+      "why": "Персональные данные. Страну и город Метрика определяет сама, мы получаем только их названия."
+    },
+    {
+      "what": "Параметры визитов и посетителей (params, parsedParams*)",
+      "why": "Сайт может записать туда что угодно: e-mail, телефон, номер заказа. Содержимое не контролируется."
+    },
+    {
+      "what": "Рекламные click ID (GCLID, yclid, SBCLID и т. п.)",
+      "why": "Идентифицируют конкретный клик конкретного человека."
+    },
+    {
+      "what": "Офлайн-звонки (offlineCall*)",
+      "why": "Номера телефонов и записи разговоров."
+    },
+    {
+      "what": "amoCRM: контакты и компании целиком, название сделки, кастомные поля (кроме полей отслеживания), примечания, тексты задач, пользователи",
+      "why": "Имена, телефоны, e-mail и свободный текст. От контактов и компаний остаются только их числовые ID, от сотрудников — хэш ID."
+    },
+    {
+      "what": "amoCRM: внешние ID и сервисы источников сделок (external_id, services)",
+      "why": "Там бывают номера телефонов и ссылки."
+    },
+    {
+      "what": "Имена, e-mail, телефоны, адреса, платёжные данные",
+      "why": "Не загружаются ни в каком виде, в том числе в тестовых и демонстрационных данных."
+    }
+  ],
+  "tables": [
+    {
+      "id": "amocrm_dictionaries",
+      "layer": "dds",
+      "view": "dds.amocrm__dictionaries",
+      "source_code": "amocrm",
+      "entity": "dictionaries",
+      "title": "Справочники amoCRM",
+      "purpose": "Прочие справочники аккаунта: причины отказа, типы задач и источники сделок — снимок на день загрузки.",
+      "grain": "Одна строка — элемент справочника в снимке дня.",
+      "key": [
+        "account_id",
+        "dictionary",
+        "item_id"
+      ],
+      "partition": [
+        "account_id",
+        "dt"
+      ],
+      "day_rule": "dt — день загрузки: в нём лежит снимок справочников на момент загрузки.",
+      "notes": [
+        "Колонки, которых нет у справочника, у его строк NULL.",
+        "Не указывайте в тегах и названиях источников персональные данные (ФИО, телефоны, e-mail) — эти поля загружаются в хранилище как есть."
+      ],
+      "tags": [
+        "amocrm",
+        "crm",
+        "справочник"
+      ],
+      "upstream": [],
+      "fields": [
+        {
+          "name": "account_id",
+          "type": "VARCHAR",
+          "api": "account_id",
+          "group": "key",
+          "description": "Номер аккаунта amoCRM, источник строки. Ключ партиции.",
+          "example": "31000001",
+          "tags": []
+        },
+        {
+          "name": "dictionary",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "key",
+          "description": "Справочник: loss_reason (причины отказа), task_type (типы задач) или lead_source (источники сделок).",
+          "example": "loss_reason",
+          "tags": []
+        },
+        {
+          "name": "item_id",
+          "type": "BIGINT",
+          "api": "id",
+          "group": "key",
+          "description": "ID элемента справочника.",
+          "example": "21000001",
+          "tags": []
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "api": "name",
+          "group": "dictionary",
+          "description": "Название элемента. У источников сделок его задаёт клиент: Не указывайте в тегах и названиях источников персональные данные (ФИО, телефоны, e-mail) — эти поля загружаются в хранилище как есть.",
+          "example": "Пропала потребность",
+          "tags": []
+        },
+        {
+          "name": "parent_id",
+          "type": "BIGINT",
+          "api": "pipeline_id",
+          "group": "dictionary",
+          "description": "Воронка источника сделок (lead_source).",
+          "example": "8000001",
+          "tags": []
+        },
+        {
+          "name": "is_default",
+          "type": "BOOLEAN",
+          "api": "default",
+          "group": "dictionary",
+          "description": "Источник сделок по умолчанию (lead_source).",
+          "example": "false",
+          "tags": []
+        },
+        {
+          "name": "origin_code",
+          "type": "VARCHAR",
+          "api": "origin_code",
+          "group": "dictionary",
+          "description": "Код канала источника сделок (lead_source).",
+          "example": "site",
+          "tags": []
+        },
+        {
+          "name": "sort",
+          "type": "BIGINT",
+          "api": "sort",
+          "group": "dictionary",
+          "description": "Порядок (у причин отказа и типов задач).",
+          "example": "100000",
+          "tags": []
+        },
+        {
+          "name": "code",
+          "type": "VARCHAR",
+          "api": "code",
+          "group": "dictionary",
+          "description": "Код типа задачи (task_type): FOLLOW_UP, MEETING.",
+          "example": "FOLLOW_UP",
+          "tags": []
+        },
+        {
+          "name": "color",
+          "type": "VARCHAR",
+          "api": "color",
+          "group": "dictionary",
+          "description": "Цвет типа задачи (task_type).",
+          "example": "#ffcc66",
+          "tags": []
+        },
+        {
+          "name": "item_created_at",
+          "type": "TIMESTAMP",
+          "api": "created_at",
+          "group": "time",
+          "description": "Когда элемент создан (у причин отказа), время аккаунта.",
+          "example": "2026-11-01 09:00:00",
+          "tags": []
+        },
+        {
+          "name": "item_updated_at",
+          "type": "TIMESTAMP",
+          "api": "updated_at",
+          "group": "time",
+          "description": "Когда элемент изменён (у причин отказа), время аккаунта.",
+          "example": "2026-11-01 09:00:00",
+          "tags": []
+        },
+        {
+          "name": "_version_at",
+          "type": "TIMESTAMP",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: когда загрузка записала эту версию строки (UTC). Перезагрузка дня сохраняет время у уже записанной версии.",
+          "example": "2026-11-04 03:12:45",
+          "tags": []
+        },
+        {
+          "name": "_run_id",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: идентификатор загрузки, которая записала окно. Помогает сверить данные с журналом загрузок.",
+          "example": "run-0c1f…",
+          "tags": []
+        },
+        {
+          "name": "_connector_version_id",
+          "type": "BIGINT",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: версия контракта коннектора (сейчас 1). Поле, добавленное в новой версии, у старых строк NULL.",
+          "example": "1",
+          "tags": []
+        },
+        {
+          "name": "dt",
+          "type": "DATE",
+          "api": null,
+          "group": "time",
+          "description": "День окна загрузки (партиция). Фильтруйте по нему — тогда читаются только файлы нужных дней.",
+          "example": "2026-11-03",
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "amocrm_lead_events",
+      "layer": "dds",
+      "view": "dds.amocrm__lead_events",
+      "source_code": "amocrm",
+      "entity": "lead_events",
+      "title": "События сделок",
+      "purpose": "Журнал событий по сделкам: создание, смена этапа, ответственного и бюджета, удаление, восстановление, объединение.",
+      "grain": "Одна строка — одно событие по сделке.",
+      "key": [
+        "account_id",
+        "event_id"
+      ],
+      "partition": [
+        "account_id",
+        "dt"
+      ],
+      "day_rule": "dt — день created_at события в часовом поясе аккаунта. Журнал неизменяем.",
+      "notes": [
+        "Длительность этапа: lag(created_at) по lead_id среди событий lead_status_changed — считайте в своём SQL по всем дням.",
+        "Типы событий вне списка не загружаются; значения событий — только числовые ID этапов, ответственных (хэшем) и бюджета."
+      ],
+      "tags": [
+        "amocrm",
+        "crm",
+        "события",
+        "воронка"
+      ],
+      "upstream": [],
+      "fields": [
+        {
+          "name": "account_id",
+          "type": "VARCHAR",
+          "api": "account_id",
+          "group": "key",
+          "description": "Номер аккаунта amoCRM, источник строки. Ключ партиции.",
+          "example": "31000001",
+          "tags": []
+        },
+        {
+          "name": "event_id",
+          "type": "VARCHAR",
+          "api": "id",
+          "group": "key",
+          "description": "ID события.",
+          "example": "01m6k69ev9b9b0wcv32nczkhw6",
+          "tags": []
+        },
+        {
+          "name": "event_type",
+          "type": "VARCHAR",
+          "api": "type",
+          "group": "crm",
+          "description": "Тип события: lead_added, lead_status_changed, entity_responsible_changed, sale_field_changed, lead_deleted, lead_restored, entity_merged.",
+          "example": "lead_status_changed",
+          "tags": []
+        },
+        {
+          "name": "lead_id",
+          "type": "BIGINT",
+          "api": "entity_id",
+          "group": "key",
+          "description": "ID сделки события.",
+          "example": "28000001",
+          "tags": []
+        },
+        {
+          "name": "created_by_hash",
+          "type": "VARCHAR",
+          "api": "created_by",
+          "group": "people",
+          "description": "Хэш ID совершившего действие; NULL у робота или системы. Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "3f1c…",
+          "tags": []
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "api": "created_at",
+          "group": "time",
+          "description": "Когда произошло событие, время аккаунта. Задаёт день dt.",
+          "example": "2026-11-03 16:40:12",
+          "tags": []
+        },
+        {
+          "name": "pipeline_id_before",
+          "type": "BIGINT",
+          "api": "value_before[0].lead_status.pipeline_id",
+          "group": "crm",
+          "description": "Воронка до смены этапа (lead_status_changed).",
+          "example": "8000001",
+          "tags": []
+        },
+        {
+          "name": "status_id_before",
+          "type": "BIGINT",
+          "api": "value_before[0].lead_status.id",
+          "group": "crm",
+          "description": "Этап до смены (lead_status_changed).",
+          "example": "70000001",
+          "tags": []
+        },
+        {
+          "name": "pipeline_id_after",
+          "type": "BIGINT",
+          "api": "value_after[0].lead_status.pipeline_id",
+          "group": "crm",
+          "description": "Воронка после смены этапа.",
+          "example": "8000001",
+          "tags": []
+        },
+        {
+          "name": "status_id_after",
+          "type": "BIGINT",
+          "api": "value_after[0].lead_status.id",
+          "group": "crm",
+          "description": "Этап после смены.",
+          "example": "70000002",
+          "tags": []
+        },
+        {
+          "name": "responsible_before_hash",
+          "type": "VARCHAR",
+          "api": "value_before[0].responsible_user.id",
+          "group": "people",
+          "description": "Хэш ответственного до смены (entity_responsible_changed). Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "3f1c…",
+          "tags": []
+        },
+        {
+          "name": "responsible_after_hash",
+          "type": "VARCHAR",
+          "api": "value_after[0].responsible_user.id",
+          "group": "people",
+          "description": "Хэш ответственного после смены. Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "3f1c…",
+          "tags": []
+        },
+        {
+          "name": "price_before",
+          "type": "BIGINT",
+          "api": "value_before[0].sale_field_value.sale",
+          "group": "measure",
+          "description": "Бюджет до изменения (sale_field_changed).",
+          "example": "12000",
+          "tags": []
+        },
+        {
+          "name": "price_after",
+          "type": "BIGINT",
+          "api": "value_after[0].sale_field_value.sale",
+          "group": "measure",
+          "description": "Бюджет после изменения (sale_field_changed).",
+          "example": "45000",
+          "tags": []
+        },
+        {
+          "name": "_version_at",
+          "type": "TIMESTAMP",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: когда загрузка записала эту версию строки (UTC). Перезагрузка дня сохраняет время у уже записанной версии.",
+          "example": "2026-11-04 03:12:45",
+          "tags": []
+        },
+        {
+          "name": "_run_id",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: идентификатор загрузки, которая записала окно. Помогает сверить данные с журналом загрузок.",
+          "example": "run-0c1f…",
+          "tags": []
+        },
+        {
+          "name": "_connector_version_id",
+          "type": "BIGINT",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: версия контракта коннектора (сейчас 1). Поле, добавленное в новой версии, у старых строк NULL.",
+          "example": "1",
+          "tags": []
+        },
+        {
+          "name": "dt",
+          "type": "DATE",
+          "api": null,
+          "group": "time",
+          "description": "День окна загрузки (партиция). Фильтруйте по нему — тогда читаются только файлы нужных дней.",
+          "example": "2026-11-03",
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "amocrm_leads",
+      "layer": "dds",
+      "view": "dds.amocrm__leads",
+      "source_code": "amocrm",
+      "entity": "leads",
+      "title": "Сделки (версии)",
+      "purpose": "Версии сделок: этап, бюджет, ответственный, источник, метки и ID контактов на момент последнего изменения за день.",
+      "grain": "Одна строка — версия сделки: состояние сделки на конец дня её изменения.",
+      "key": [
+        "account_id",
+        "lead_id",
+        "updated_at"
+      ],
+      "partition": [
+        "account_id",
+        "dt"
+      ],
+      "day_rule": "dt — день updated_at в часовом поясе аккаунта: сделка, менявшаяся в разные дни, лежит в нескольких днях.",
+      "notes": [
+        "Текущее состояние сделки — её последняя версия: row_number() over (partition by account_id, lead_id order by updated_at desc) = 1. count(*) по таблице считает версии, а не сделки.",
+        "Перезагрузка дня сохраняет версии, которых amoCRM уже не отдаёт за этот день (сделка изменилась позже), и время их записи _version_at.",
+        "Склейка с визитами Метрики: ym_client_id_hash = client_id_hash визитов (когда Метрика начнёт отдавать хэш), сужение по ym_counter_id.",
+        "Не указывайте в тегах и названиях источников персональные данные (ФИО, телефоны, e-mail) — эти поля загружаются в хранилище как есть."
+      ],
+      "tags": [
+        "amocrm",
+        "crm",
+        "сделки",
+        "utm"
+      ],
+      "upstream": [],
+      "fields": [
+        {
+          "name": "account_id",
+          "type": "VARCHAR",
+          "api": "account_id",
+          "group": "key",
+          "description": "Номер аккаунта amoCRM, источник строки. Ключ партиции.",
+          "example": "31000001",
+          "tags": []
+        },
+        {
+          "name": "lead_id",
+          "type": "BIGINT",
+          "api": "id",
+          "group": "key",
+          "description": "ID сделки.",
+          "example": "28000001",
+          "tags": []
+        },
+        {
+          "name": "pipeline_id",
+          "type": "BIGINT",
+          "api": "pipeline_id",
+          "group": "crm",
+          "description": "ID воронки, в которой сделка была в этой версии.",
+          "example": "8000001",
+          "tags": []
+        },
+        {
+          "name": "status_id",
+          "type": "BIGINT",
+          "api": "status_id",
+          "group": "crm",
+          "description": "ID этапа: 142 — «Успешно реализовано», 143 — «Закрыто и не реализовано».",
+          "example": "70000002",
+          "tags": []
+        },
+        {
+          "name": "price",
+          "type": "BIGINT",
+          "api": "price",
+          "group": "measure",
+          "description": "Бюджет сделки в валюте аккаунта, целое число.",
+          "example": "45000",
+          "tags": []
+        },
+        {
+          "name": "responsible_user_hash",
+          "type": "VARCHAR",
+          "api": "responsible_user_id",
+          "group": "people",
+          "description": "Хэш ID ответственного сотрудника. Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "3f1c…",
+          "tags": []
+        },
+        {
+          "name": "group_id",
+          "type": "BIGINT",
+          "api": "group_id",
+          "group": "people",
+          "description": "ID группы ответственного; 0 — без группы.",
+          "example": "0",
+          "tags": []
+        },
+        {
+          "name": "created_by_hash",
+          "type": "VARCHAR",
+          "api": "created_by",
+          "group": "people",
+          "description": "Хэш ID создателя; NULL, если сделку создал робот или система. Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "3f1c…",
+          "tags": []
+        },
+        {
+          "name": "updated_by_hash",
+          "type": "VARCHAR",
+          "api": "updated_by",
+          "group": "people",
+          "description": "Хэш ID изменившего последним; NULL у робота или системы. Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "3f1c…",
+          "tags": []
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "api": "created_at",
+          "group": "time",
+          "description": "Когда сделка создана, время аккаунта.",
+          "example": "2026-11-02 10:15:00",
+          "tags": []
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "api": "updated_at",
+          "group": "time",
+          "description": "Когда сделка изменена, время аккаунта. Задаёт день dt и входит в ключ версии.",
+          "example": "2026-11-03 16:40:12",
+          "tags": []
+        },
+        {
+          "name": "closed_at",
+          "type": "TIMESTAMP",
+          "api": "closed_at",
+          "group": "time",
+          "description": "Когда сделка закрыта, время аккаунта; NULL у открытой.",
+          "example": "2026-11-03 16:40:12",
+          "tags": []
+        },
+        {
+          "name": "closest_task_at",
+          "type": "TIMESTAMP",
+          "api": "closest_task_at",
+          "group": "time",
+          "description": "Срок ближайшей задачи по сделке, время аккаунта.",
+          "example": "2026-11-05 12:00:00",
+          "tags": []
+        },
+        {
+          "name": "is_deleted",
+          "type": "BOOLEAN",
+          "api": "is_deleted",
+          "group": "crm",
+          "description": "Сделка в корзине.",
+          "example": "false",
+          "tags": []
+        },
+        {
+          "name": "loss_reason_id",
+          "type": "BIGINT",
+          "api": "loss_reason_id",
+          "group": "crm",
+          "description": "ID причины отказа; расшифровка — amocrm__dictionaries (dictionary = 'loss_reason').",
+          "example": "21000001",
+          "tags": []
+        },
+        {
+          "name": "source_id",
+          "type": "BIGINT",
+          "api": "source_id",
+          "group": "attribution",
+          "description": "ID источника сделки; расшифровка — amocrm__dictionaries (dictionary = 'lead_source').",
+          "example": "1200001",
+          "tags": []
+        },
+        {
+          "name": "score",
+          "type": "BIGINT",
+          "api": "score",
+          "group": "crm",
+          "description": "Скоринг сделки.",
+          "example": "70",
+          "tags": []
+        },
+        {
+          "name": "labor_cost",
+          "type": "BIGINT",
+          "api": "labor_cost",
+          "group": "measure",
+          "description": "Затраченное время, секунды.",
+          "example": "3600",
+          "tags": []
+        },
+        {
+          "name": "company_id",
+          "type": "BIGINT",
+          "api": "_embedded.companies[0].id",
+          "group": "people",
+          "description": "ID компании сделки (открытый, по решению владельца 2026-11-04); сама компания не загружается.",
+          "example": "45000001",
+          "tags": []
+        },
+        {
+          "name": "contacts_count",
+          "type": "BIGINT",
+          "api": "_embedded.contacts",
+          "group": "people",
+          "description": "Число контактов сделки; сами контакты не загружаются.",
+          "example": "1",
+          "tags": []
+        },
+        {
+          "name": "contact_ids",
+          "type": "BIGINT[]",
+          "api": "_embedded.contacts[].id",
+          "group": "people",
+          "description": "ID контактов сделки (открытые, по решению владельца 2026-11-04).",
+          "example": "[37000001]",
+          "tags": []
+        },
+        {
+          "name": "main_contact_id",
+          "type": "BIGINT",
+          "api": "_embedded.contacts[is_main].id",
+          "group": "people",
+          "description": "ID основного контакта: уникальные клиенты, повторные сделки, LTV.",
+          "example": "37000001",
+          "tags": []
+        },
+        {
+          "name": "tag_ids",
+          "type": "BIGINT[]",
+          "api": "_embedded.tags[].id",
+          "group": "crm",
+          "description": "ID тегов сделки; пустой массив, если тегов нет.",
+          "example": "[250001]",
+          "tags": []
+        },
+        {
+          "name": "tag_names",
+          "type": "VARCHAR[]",
+          "api": "_embedded.tags[].name",
+          "group": "crm",
+          "description": "Названия тегов в том же порядке, что tag_ids. Не указывайте в тегах и названиях источников персональные данные (ФИО, телефоны, e-mail) — эти поля загружаются в хранилище как есть.",
+          "example": "[повторный]",
+          "tags": []
+        },
+        {
+          "name": "ym_client_id_hash",
+          "type": "VARCHAR",
+          "api": "custom_fields_values: _YM_UID",
+          "group": "attribution",
+          "description": "Хэш ClientID Метрики из поля отслеживания _ym_uid; склеивается с визитами Метрики того же хранилища. Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "9a0b…",
+          "tags": []
+        },
+        {
+          "name": "ym_counter_id",
+          "type": "BIGINT",
+          "api": "custom_fields_values: _YM_COUNTER",
+          "group": "attribution",
+          "description": "Номер счётчика Метрики, с которого пришла заявка (поле отслеживания _ym_counter).",
+          "example": "90000001",
+          "tags": []
+        },
+        {
+          "name": "utm_source",
+          "type": "VARCHAR",
+          "api": "custom_fields_values: UTM_SOURCE",
+          "group": "utm",
+          "description": "UTM-метка utm_source сделки (поле отслеживания).",
+          "example": "yandex",
+          "tags": []
+        },
+        {
+          "name": "utm_medium",
+          "type": "VARCHAR",
+          "api": "custom_fields_values: UTM_MEDIUM",
+          "group": "utm",
+          "description": "UTM-метка utm_medium сделки.",
+          "example": "cpc",
+          "tags": []
+        },
+        {
+          "name": "utm_campaign",
+          "type": "VARCHAR",
+          "api": "custom_fields_values: UTM_CAMPAIGN",
+          "group": "utm",
+          "description": "UTM-метка utm_campaign сделки.",
+          "example": "autumn",
+          "tags": []
+        },
+        {
+          "name": "utm_content",
+          "type": "VARCHAR",
+          "api": "custom_fields_values: UTM_CONTENT",
+          "group": "utm",
+          "description": "UTM-метка utm_content сделки.",
+          "example": "banner-1",
+          "tags": []
+        },
+        {
+          "name": "utm_term",
+          "type": "VARCHAR",
+          "api": "custom_fields_values: UTM_TERM",
+          "group": "utm",
+          "description": "UTM-метка utm_term сделки.",
+          "example": "samovar",
+          "tags": []
+        },
+        {
+          "name": "referrer",
+          "type": "VARCHAR",
+          "api": "custom_fields_values: REFERRER",
+          "group": "attribution",
+          "description": "Реферер сделки; параметры click ID (yclid, gclid, fbclid, ysclid, sbclid) из него вырезаны.",
+          "example": "https://example.org/",
+          "tags": []
+        },
+        {
+          "name": "yclid_hash",
+          "type": "VARCHAR",
+          "api": "custom_fields_values: YCLID",
+          "group": "attribution",
+          "description": "Хэш click ID Яндекс Директа (поле отслеживания YCLID). Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "51d2…",
+          "tags": []
+        },
+        {
+          "name": "gclid_hash",
+          "type": "VARCHAR",
+          "api": "custom_fields_values: GCLID",
+          "group": "attribution",
+          "description": "Хэш click ID Google Ads (поле отслеживания GCLID). Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "c7e9…",
+          "tags": []
+        },
+        {
+          "name": "_version_at",
+          "type": "TIMESTAMP",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: когда загрузка записала эту версию строки (UTC). Перезагрузка дня сохраняет время у уже записанной версии.",
+          "example": "2026-11-04 03:12:45",
+          "tags": []
+        },
+        {
+          "name": "_run_id",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: идентификатор загрузки, которая записала окно. Помогает сверить данные с журналом загрузок.",
+          "example": "run-0c1f…",
+          "tags": []
+        },
+        {
+          "name": "_connector_version_id",
+          "type": "BIGINT",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: версия контракта коннектора (сейчас 1). Поле, добавленное в новой версии, у старых строк NULL.",
+          "example": "1",
+          "tags": []
+        },
+        {
+          "name": "dt",
+          "type": "DATE",
+          "api": null,
+          "group": "time",
+          "description": "День окна загрузки (партиция). Фильтруйте по нему — тогда читаются только файлы нужных дней.",
+          "example": "2026-11-03",
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "amocrm_pipeline_statuses",
+      "layer": "dds",
+      "view": "dds.amocrm__pipeline_statuses",
+      "source_code": "amocrm",
+      "entity": "pipeline_statuses",
+      "title": "Воронки и этапы",
+      "purpose": "Справочник воронок и этапов: названия, порядок и признаки — снимок на день загрузки.",
+      "grain": "Одна строка — этап воронки в снимке дня.",
+      "key": [
+        "account_id",
+        "pipeline_id",
+        "status_id"
+      ],
+      "partition": [
+        "account_id",
+        "dt"
+      ],
+      "day_rule": "dt — день загрузки: в нём лежит снимок справочника на момент загрузки. Перезагрузка прошлого дня записывает туда текущий снимок.",
+      "notes": [
+        "Берите снимок последнего дня, чтобы получить актуальные названия."
+      ],
+      "tags": [
+        "amocrm",
+        "crm",
+        "справочник",
+        "воронка"
+      ],
+      "upstream": [],
+      "fields": [
+        {
+          "name": "account_id",
+          "type": "VARCHAR",
+          "api": "account_id",
+          "group": "key",
+          "description": "Номер аккаунта amoCRM, источник строки. Ключ партиции.",
+          "example": "31000001",
+          "tags": []
+        },
+        {
+          "name": "pipeline_id",
+          "type": "BIGINT",
+          "api": "pipelines[].id",
+          "group": "key",
+          "description": "ID воронки.",
+          "example": "8000001",
+          "tags": []
+        },
+        {
+          "name": "pipeline_name",
+          "type": "VARCHAR",
+          "api": "pipelines[].name",
+          "group": "dictionary",
+          "description": "Название воронки.",
+          "example": "Продажи",
+          "tags": []
+        },
+        {
+          "name": "pipeline_sort",
+          "type": "BIGINT",
+          "api": "pipelines[].sort",
+          "group": "dictionary",
+          "description": "Порядок воронки.",
+          "example": "1",
+          "tags": []
+        },
+        {
+          "name": "is_main",
+          "type": "BOOLEAN",
+          "api": "pipelines[].is_main",
+          "group": "dictionary",
+          "description": "Главная воронка.",
+          "example": "true",
+          "tags": []
+        },
+        {
+          "name": "is_unsorted_on",
+          "type": "BOOLEAN",
+          "api": "pipelines[].is_unsorted_on",
+          "group": "dictionary",
+          "description": "В воронке включено «Неразобранное».",
+          "example": "true",
+          "tags": []
+        },
+        {
+          "name": "is_archive",
+          "type": "BOOLEAN",
+          "api": "pipelines[].is_archive",
+          "group": "dictionary",
+          "description": "Воронка в архиве.",
+          "example": "false",
+          "tags": []
+        },
+        {
+          "name": "status_id",
+          "type": "BIGINT",
+          "api": "statuses[].id",
+          "group": "key",
+          "description": "ID этапа; 142 и 143 есть в каждой воронке.",
+          "example": "70000002",
+          "tags": []
+        },
+        {
+          "name": "status_name",
+          "type": "VARCHAR",
+          "api": "statuses[].name",
+          "group": "dictionary",
+          "description": "Название этапа.",
+          "example": "Переговоры",
+          "tags": []
+        },
+        {
+          "name": "status_sort",
+          "type": "BIGINT",
+          "api": "statuses[].sort",
+          "group": "dictionary",
+          "description": "Порядок этапа в воронке.",
+          "example": "30",
+          "tags": []
+        },
+        {
+          "name": "status_type",
+          "type": "BIGINT",
+          "api": "statuses[].type",
+          "group": "dictionary",
+          "description": "Тип этапа: 1 — неразобранное, 0 — обычный.",
+          "example": "0",
+          "tags": []
+        },
+        {
+          "name": "is_editable",
+          "type": "BOOLEAN",
+          "api": "statuses[].is_editable",
+          "group": "dictionary",
+          "description": "Этап можно редактировать.",
+          "example": "true",
+          "tags": []
+        },
+        {
+          "name": "color",
+          "type": "VARCHAR",
+          "api": "statuses[].color",
+          "group": "dictionary",
+          "description": "Цвет этапа, #rrggbb.",
+          "example": "#99ccff",
+          "tags": []
+        },
+        {
+          "name": "_version_at",
+          "type": "TIMESTAMP",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: когда загрузка записала эту версию строки (UTC). Перезагрузка дня сохраняет время у уже записанной версии.",
+          "example": "2026-11-04 03:12:45",
+          "tags": []
+        },
+        {
+          "name": "_run_id",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: идентификатор загрузки, которая записала окно. Помогает сверить данные с журналом загрузок.",
+          "example": "run-0c1f…",
+          "tags": []
+        },
+        {
+          "name": "_connector_version_id",
+          "type": "BIGINT",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: версия контракта коннектора (сейчас 1). Поле, добавленное в новой версии, у старых строк NULL.",
+          "example": "1",
+          "tags": []
+        },
+        {
+          "name": "dt",
+          "type": "DATE",
+          "api": null,
+          "group": "time",
+          "description": "День окна загрузки (партиция). Фильтруйте по нему — тогда читаются только файлы нужных дней.",
+          "example": "2026-11-03",
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "amocrm_tasks",
+      "layer": "dds",
+      "view": "dds.amocrm__tasks",
+      "source_code": "amocrm",
+      "entity": "tasks",
+      "title": "Задачи (версии)",
+      "purpose": "Версии задач: тип, срок, ответственный и выполнение на момент последнего изменения за день; текст задач не загружается.",
+      "grain": "Одна строка — версия задачи: состояние на конец дня её изменения.",
+      "key": [
+        "account_id",
+        "task_id",
+        "updated_at"
+      ],
+      "partition": [
+        "account_id",
+        "dt"
+      ],
+      "day_rule": "dt — день updated_at в часовом поясе аккаунта.",
+      "notes": [
+        "Текущее состояние задачи — последняя версия по updated_at, как у сделок."
+      ],
+      "tags": [
+        "amocrm",
+        "crm",
+        "задачи"
+      ],
+      "upstream": [],
+      "fields": [
+        {
+          "name": "account_id",
+          "type": "VARCHAR",
+          "api": "account_id",
+          "group": "key",
+          "description": "Номер аккаунта amoCRM, источник строки. Ключ партиции.",
+          "example": "31000001",
+          "tags": []
+        },
+        {
+          "name": "task_id",
+          "type": "BIGINT",
+          "api": "id",
+          "group": "key",
+          "description": "ID задачи.",
+          "example": "38000001",
+          "tags": []
+        },
+        {
+          "name": "entity_id",
+          "type": "BIGINT",
+          "api": "entity_id",
+          "group": "crm",
+          "description": "ID сущности, к которой привязана задача.",
+          "example": "28000001",
+          "tags": []
+        },
+        {
+          "name": "entity_type",
+          "type": "VARCHAR",
+          "api": "entity_type",
+          "group": "crm",
+          "description": "Тип сущности задачи: leads, contacts, companies или customers.",
+          "example": "leads",
+          "tags": []
+        },
+        {
+          "name": "task_type_id",
+          "type": "BIGINT",
+          "api": "task_type_id",
+          "group": "crm",
+          "description": "Тип задачи; расшифровка — amocrm__dictionaries (dictionary = 'task_type').",
+          "example": "1",
+          "tags": []
+        },
+        {
+          "name": "responsible_user_hash",
+          "type": "VARCHAR",
+          "api": "responsible_user_id",
+          "group": "people",
+          "description": "Хэш ID ответственного. Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "3f1c…",
+          "tags": []
+        },
+        {
+          "name": "group_id",
+          "type": "BIGINT",
+          "api": "group_id",
+          "group": "people",
+          "description": "ID группы ответственного.",
+          "example": "0",
+          "tags": []
+        },
+        {
+          "name": "is_completed",
+          "type": "BOOLEAN",
+          "api": "is_completed",
+          "group": "crm",
+          "description": "Задача выполнена.",
+          "example": "false",
+          "tags": []
+        },
+        {
+          "name": "duration",
+          "type": "BIGINT",
+          "api": "duration",
+          "group": "measure",
+          "description": "Длительность, секунды.",
+          "example": "0",
+          "tags": []
+        },
+        {
+          "name": "complete_till",
+          "type": "TIMESTAMP",
+          "api": "complete_till",
+          "group": "time",
+          "description": "Срок выполнения, время аккаунта.",
+          "example": "2026-11-05 18:00:00",
+          "tags": []
+        },
+        {
+          "name": "created_by_hash",
+          "type": "VARCHAR",
+          "api": "created_by",
+          "group": "people",
+          "description": "Хэш ID создателя; NULL у робота или системы. Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "3f1c…",
+          "tags": []
+        },
+        {
+          "name": "updated_by_hash",
+          "type": "VARCHAR",
+          "api": "updated_by",
+          "group": "people",
+          "description": "Хэш ID изменившего последним; NULL у робота или системы. Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "3f1c…",
+          "tags": []
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "api": "created_at",
+          "group": "time",
+          "description": "Когда задача создана, время аккаунта.",
+          "example": "2026-11-03 09:30:00",
+          "tags": []
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "api": "updated_at",
+          "group": "time",
+          "description": "Когда задача изменена, время аккаунта. Задаёт день dt и входит в ключ версии.",
+          "example": "2026-11-03 09:30:00",
+          "tags": []
+        },
+        {
+          "name": "_version_at",
+          "type": "TIMESTAMP",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: когда загрузка записала эту версию строки (UTC). Перезагрузка дня сохраняет время у уже записанной версии.",
+          "example": "2026-11-04 03:12:45",
+          "tags": []
+        },
+        {
+          "name": "_run_id",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: идентификатор загрузки, которая записала окно. Помогает сверить данные с журналом загрузок.",
+          "example": "run-0c1f…",
+          "tags": []
+        },
+        {
+          "name": "_connector_version_id",
+          "type": "BIGINT",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: версия контракта коннектора (сейчас 1). Поле, добавленное в новой версии, у старых строк NULL.",
+          "example": "1",
+          "tags": []
+        },
+        {
+          "name": "dt",
+          "type": "DATE",
+          "api": null,
+          "group": "time",
+          "description": "День окна загрузки (партиция). Фильтруйте по нему — тогда читаются только файлы нужных дней.",
+          "example": "2026-11-03",
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "hits",
+      "layer": "dds",
+      "view": "dds.yandex_metrika_logs_api__hits",
+      "source_code": "yandex_metrika_logs_api",
+      "entity": "hits",
+      "title": "События (хиты)",
+      "purpose": "Каждое событие на сайте: просмотр страницы, переход по внешней ссылке, загрузка файла, достижение цели. Нужны для анализа страниц и путей внутри визита.",
+      "grain": "Одна строка — одно событие (хит) на одном счётчике.",
+      "key": [
+        "counter_id",
+        "watch_id"
+      ],
+      "partition": [
+        "counter_id",
+        "dt"
+      ],
+      "day_rule": "dt — день события в часовом поясе счётчика.",
+      "notes": [
+        "Флаги page_views, link_clicks, downloads, not_bounce, artificial — 0/1, их можно суммировать.",
+        "traffic_source у событий — последний источник трафика (lastTrafficSource), модель атрибуции не настраивается.",
+        "title может содержать текст, введённый пользователем сайта (например, поисковый запрос в заголовке). Риск принят владельцем продукта 2026-10-10."
+      ],
+      "tags": [
+        "метрика",
+        "события",
+        "страницы",
+        "цели"
+      ],
+      "upstream": [],
+      "fields": [
+        {
+          "name": "watch_id",
+          "type": "VARCHAR",
+          "api": "ym:pv:watchID",
+          "group": "key",
+          "description": "Идентификатор события. UInt64 строкой.",
+          "example": "9045512837726104401",
+          "tags": []
+        },
+        {
+          "name": "counter_id",
+          "type": "VARCHAR",
+          "api": "ym:pv:counterID",
+          "group": "key",
+          "description": "Номер счётчика. Ключ партиции.",
+          "example": "90000001",
+          "tags": []
+        },
+        {
+          "name": "page_view_id",
+          "type": "VARCHAR",
+          "api": "ym:pv:pageViewID",
+          "group": "key",
+          "description": "Идентификатор просмотра страницы, к которому относится событие.",
+          "example": "1847729100344",
+          "tags": []
+        },
+        {
+          "name": "visit_id",
+          "type": "VARCHAR",
+          "api": "ym:pv:visitID",
+          "group": "key",
+          "description": "Визит, к которому относится событие; '0', если Метрика не связала событие с визитом.",
+          "example": "7311864928374650001",
+          "tags": []
+        },
+        {
+          "name": "occurred_at",
+          "type": "TIMESTAMP",
+          "api": "ym:pv:dateTime",
+          "group": "time",
+          "description": "Дата и время события в часовом поясе счётчика.",
+          "example": "2026-10-18 14:04:10",
+          "tags": []
+        },
+        {
+          "name": "dt",
+          "type": "DATE",
+          "api": null,
+          "group": "time",
+          "description": "День окна загрузки (партиция).",
+          "example": "2026-10-18",
+          "tags": []
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR",
+          "api": "ym:pv:title",
+          "group": "pages",
+          "description": "Заголовок страницы (title).",
+          "example": "Каталог чайников — Магазин",
+          "tags": [
+            "страницы"
+          ]
+        },
+        {
+          "name": "url",
+          "type": "VARCHAR",
+          "api": "ym:pv:URL",
+          "group": "pages",
+          "description": "Адрес страницы — полный URL с query-строкой.",
+          "example": "https://shop.example/catalog?sort=price",
+          "tags": [
+            "страницы"
+          ]
+        },
+        {
+          "name": "referer",
+          "type": "VARCHAR",
+          "api": "ym:pv:referer",
+          "group": "pages",
+          "description": "Предыдущая страница — полный URL.",
+          "example": "https://shop.example/",
+          "tags": [
+            "страницы"
+          ]
+        },
+        {
+          "name": "page_views",
+          "type": "BIGINT",
+          "api": "ym:pv:isPageView",
+          "group": "behaviour",
+          "description": "Флаг 0/1: событие — просмотр страницы. Названо как мера, чтобы сумма давала число просмотров.",
+          "example": "1",
+          "tags": []
+        },
+        {
+          "name": "link_clicks",
+          "type": "BIGINT",
+          "api": "ym:pv:link",
+          "group": "behaviour",
+          "description": "Флаг 0/1: переход по внешней ссылке.",
+          "example": "0",
+          "tags": []
+        },
+        {
+          "name": "downloads",
+          "type": "BIGINT",
+          "api": "ym:pv:download",
+          "group": "behaviour",
+          "description": "Флаг 0/1: загрузка файла.",
+          "example": "0",
+          "tags": []
+        },
+        {
+          "name": "not_bounce",
+          "type": "BIGINT",
+          "api": "ym:pv:notBounce",
+          "group": "behaviour",
+          "description": "Флаг 0/1: событие отменяет отказ (например, «точный показатель отказов»).",
+          "example": "0",
+          "tags": []
+        },
+        {
+          "name": "artificial",
+          "type": "BIGINT",
+          "api": "ym:pv:artificial",
+          "group": "behaviour",
+          "description": "Флаг 0/1: искусственное событие, отправленное кодом сайта (hit(), reachGoal и т. п.), а не обычный переход.",
+          "example": "0",
+          "tags": []
+        },
+        {
+          "name": "http_error",
+          "type": "VARCHAR",
+          "api": "ym:pv:httpError",
+          "group": "pages",
+          "description": "Код HTTP-ошибки страницы, если Метрика его зафиксировала.",
+          "example": "404",
+          "tags": [
+            "страницы"
+          ]
+        },
+        {
+          "name": "goals_id",
+          "type": "BIGINT[]",
+          "api": "ym:pv:goalsID",
+          "group": "goals",
+          "description": "Цели, достигнутые этим событием.",
+          "example": "[3101]",
+          "tags": [
+            "цели"
+          ]
+        },
+        {
+          "name": "goal_reaches",
+          "type": "BIGINT",
+          "api": null,
+          "group": "goals",
+          "description": "Число достижений целей событием = длина goals_id.",
+          "example": "1",
+          "tags": [
+            "цели"
+          ]
+        },
+        {
+          "name": "traffic_source",
+          "type": "VARCHAR",
+          "api": "ym:pv:lastTrafficSource",
+          "group": "attribution",
+          "description": "Последний источник трафика визита.",
+          "example": "ad",
+          "tags": [
+            "атрибуция"
+          ]
+        },
+        {
+          "name": "utm_source",
+          "type": "VARCHAR",
+          "api": "ym:pv:UTMSource",
+          "group": "utm",
+          "description": "UTM-метка utm_source.",
+          "example": "yandex",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "utm_medium",
+          "type": "VARCHAR",
+          "api": "ym:pv:UTMMedium",
+          "group": "utm",
+          "description": "UTM-метка utm_medium.",
+          "example": "cpc",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "utm_campaign",
+          "type": "VARCHAR",
+          "api": "ym:pv:UTMCampaign",
+          "group": "utm",
+          "description": "UTM-метка utm_campaign.",
+          "example": "brand",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "utm_content",
+          "type": "VARCHAR",
+          "api": "ym:pv:UTMContent",
+          "group": "utm",
+          "description": "UTM-метка utm_content.",
+          "example": "ad_v2",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "utm_term",
+          "type": "VARCHAR",
+          "api": "ym:pv:UTMTerm",
+          "group": "utm",
+          "description": "UTM-метка utm_term.",
+          "example": "купить чайник",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "device_category",
+          "type": "BIGINT",
+          "api": "ym:pv:deviceCategory",
+          "group": "device",
+          "description": "Тип устройства: 1 — компьютер, 2 — смартфон, 3 — планшет, 4 — ТВ.",
+          "example": "1",
+          "tags": [
+            "устройства"
+          ]
+        },
+        {
+          "name": "operating_system_root",
+          "type": "VARCHAR",
+          "api": "ym:pv:operatingSystemRoot",
+          "group": "device",
+          "description": "Семейство операционной системы.",
+          "example": "windows",
+          "tags": [
+            "устройства"
+          ]
+        },
+        {
+          "name": "browser",
+          "type": "VARCHAR",
+          "api": "ym:pv:browser",
+          "group": "device",
+          "description": "Браузер.",
+          "example": "chrome",
+          "tags": [
+            "устройства"
+          ]
+        },
+        {
+          "name": "region_country",
+          "type": "VARCHAR",
+          "api": "ym:pv:regionCountry",
+          "group": "geo",
+          "description": "Страна посетителя по геолокации Метрики.",
+          "example": "Россия",
+          "tags": [
+            "гео"
+          ]
+        },
+        {
+          "name": "region_city",
+          "type": "VARCHAR",
+          "api": "ym:pv:regionCity",
+          "group": "geo",
+          "description": "Город посетителя по геолокации Метрики.",
+          "example": "Москва",
+          "tags": [
+            "гео"
+          ]
+        },
+        {
+          "name": "_run_id",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: загрузка, записавшая строку.",
+          "example": "run-5be2…",
+          "tags": []
+        },
+        {
+          "name": "_connector_version_id",
+          "type": "BIGINT",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: версия контракта коннектора (сейчас 6).",
+          "example": "6",
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "visits",
+      "layer": "dds",
+      "view": "dds.yandex_metrika_logs_api__visits",
+      "source_code": "yandex_metrika_logs_api",
+      "entity": "visits",
+      "title": "Визиты",
+      "purpose": "Сессии посетителей сайта: откуда пришёл визит, с какого устройства, сколько страниц посмотрел, сколько длился, какие цели достиг.",
+      "grain": "Одна строка — один визит (сессия) на одном счётчике.",
+      "key": [
+        "counter_id",
+        "visit_year",
+        "visit_id"
+      ],
+      "partition": [
+        "counter_id",
+        "dt"
+      ],
+      "day_rule": "dt — день окна загрузки в часовом поясе источника (счётчика). Визит попадает в день своего начала.",
+      "notes": [
+        "visit_id уникален только в пределах года, поэтому в ключе есть visit_year.",
+        "Поля атрибуции (traffic_source, adv_engine, search_engine_root, social_network, utm_*) выгружены по модели атрибуции из настроек источника; модель записана в каждой строке в attribution_model.",
+        "Связь с событиями: hits по (counter_id, visit_id) без равенства дней — событие после полуночи принадлежит визиту прошлого дня. Для многолетней истории ограничивайте интервал.",
+        "Полные URL с query-строкой сохраняются по решению владельца продукта (2026-10-10)."
+      ],
+      "tags": [
+        "метрика",
+        "визиты",
+        "атрибуция",
+        "utm"
+      ],
+      "upstream": [],
+      "fields": [
+        {
+          "name": "visit_id",
+          "type": "VARCHAR",
+          "api": "ym:s:visitID",
+          "group": "key",
+          "description": "Идентификатор визита в Метрике. Число UInt64, хранится строкой, чтобы не терять точность.",
+          "example": "7311864928374650001",
+          "tags": []
+        },
+        {
+          "name": "counter_id",
+          "type": "VARCHAR",
+          "api": "ym:s:counterID",
+          "group": "key",
+          "description": "Номер счётчика Метрики, источник строки. Ключ партиции.",
+          "example": "90000001",
+          "tags": []
+        },
+        {
+          "name": "visit_year",
+          "type": "BIGINT",
+          "api": null,
+          "group": "key",
+          "description": "Год начала визита. Входит в ключ, потому что visit_id уникален в пределах года.",
+          "example": "2026",
+          "tags": []
+        },
+        {
+          "name": "started_at",
+          "type": "TIMESTAMP",
+          "api": "ym:s:dateTime",
+          "group": "time",
+          "description": "Дата и время начала визита в часовом поясе счётчика.",
+          "example": "2026-10-18 14:03:27",
+          "tags": []
+        },
+        {
+          "name": "dt",
+          "type": "DATE",
+          "api": null,
+          "group": "time",
+          "description": "День окна загрузки (партиция). Фильтруйте по нему — тогда читаются только файлы нужных дней.",
+          "example": "2026-10-18",
+          "tags": []
+        },
+        {
+          "name": "is_new_user",
+          "type": "BIGINT",
+          "api": "ym:s:isNewUser",
+          "group": "behaviour",
+          "description": "Флаг 0/1: первый визит посетителя по данным Метрики. Сумма флага — число визитов новых посетителей, а не число уникальных людей.",
+          "example": "1",
+          "tags": []
+        },
+        {
+          "name": "start_url",
+          "type": "VARCHAR",
+          "api": "ym:s:startURL",
+          "group": "pages",
+          "description": "Страница входа — полный URL с query-строкой.",
+          "example": "https://shop.example/catalog?sort=price",
+          "tags": [
+            "страницы"
+          ]
+        },
+        {
+          "name": "end_url",
+          "type": "VARCHAR",
+          "api": "ym:s:endURL",
+          "group": "pages",
+          "description": "Страница выхода — полный URL.",
+          "example": "https://shop.example/cart",
+          "tags": [
+            "страницы"
+          ]
+        },
+        {
+          "name": "page_views",
+          "type": "BIGINT",
+          "api": "ym:s:pageViews",
+          "group": "behaviour",
+          "description": "Число просмотров страниц за визит.",
+          "example": "5",
+          "tags": []
+        },
+        {
+          "name": "visit_duration",
+          "type": "BIGINT",
+          "api": "ym:s:visitDuration",
+          "group": "behaviour",
+          "description": "Длительность визита в секундах.",
+          "example": "184",
+          "tags": []
+        },
+        {
+          "name": "bounce",
+          "type": "BIGINT",
+          "api": "ym:s:bounce",
+          "group": "behaviour",
+          "description": "Флаг 0/1: отказ — визит с одним просмотром и короче порога Метрики.",
+          "example": "0",
+          "tags": []
+        },
+        {
+          "name": "region_country",
+          "type": "VARCHAR",
+          "api": "ym:s:regionCountry",
+          "group": "geo",
+          "description": "Страна посетителя: Метрика определяет её сама, IP-адрес к нам не попадает.",
+          "example": "Россия",
+          "tags": [
+            "гео"
+          ]
+        },
+        {
+          "name": "region_city",
+          "type": "VARCHAR",
+          "api": "ym:s:regionCity",
+          "group": "geo",
+          "description": "Город посетителя по геолокации Метрики.",
+          "example": "Казань",
+          "tags": [
+            "гео"
+          ]
+        },
+        {
+          "name": "goals_id",
+          "type": "BIGINT[]",
+          "api": "ym:s:goalsID",
+          "group": "goals",
+          "description": "Массив ID целей, достигнутых в визите. Цель может повторяться.",
+          "example": "[3101, 3101, 3207]",
+          "tags": [
+            "цели"
+          ]
+        },
+        {
+          "name": "goals_date_time",
+          "type": "TIMESTAMP[]",
+          "api": "ym:s:goalsDateTime",
+          "group": "goals",
+          "description": "Время каждого достижения цели; элементы соответствуют goals_id по позиции.",
+          "example": "[2026-10-18 14:05:01, …]",
+          "tags": [
+            "цели"
+          ]
+        },
+        {
+          "name": "goal_reaches",
+          "type": "BIGINT",
+          "api": null,
+          "group": "goals",
+          "description": "Число достижений целей в визите = длина goals_id. Вычисляется при загрузке.",
+          "example": "3",
+          "tags": [
+            "цели"
+          ]
+        },
+        {
+          "name": "traffic_source",
+          "type": "VARCHAR",
+          "api": "ym:s:<attribution>TrafficSource",
+          "group": "attribution",
+          "description": "Тип источника трафика по выбранной модели атрибуции: organic, ad, direct, referral, internal, social, email, messenger и др.",
+          "example": "organic",
+          "tags": [
+            "атрибуция"
+          ]
+        },
+        {
+          "name": "adv_engine",
+          "type": "VARCHAR",
+          "api": "ym:s:<attribution>AdvEngine",
+          "group": "attribution",
+          "description": "Рекламная система, если источник — реклама.",
+          "example": "ya_direct",
+          "tags": [
+            "атрибуция"
+          ]
+        },
+        {
+          "name": "search_engine_root",
+          "type": "VARCHAR",
+          "api": "ym:s:<attribution>SearchEngineRoot",
+          "group": "attribution",
+          "description": "Поисковая система, если источник — поиск.",
+          "example": "yandex",
+          "tags": [
+            "атрибуция"
+          ]
+        },
+        {
+          "name": "social_network",
+          "type": "VARCHAR",
+          "api": "ym:s:<attribution>SocialNetwork",
+          "group": "attribution",
+          "description": "Социальная сеть, если источник — соцсеть.",
+          "example": "vkontakte",
+          "tags": [
+            "атрибуция"
+          ]
+        },
+        {
+          "name": "referer",
+          "type": "VARCHAR",
+          "api": "ym:s:referer",
+          "group": "pages",
+          "description": "Адрес страницы, с которой пришёл посетитель, — полный URL.",
+          "example": "https://news.example/article/42",
+          "tags": [
+            "страницы"
+          ]
+        },
+        {
+          "name": "utm_source",
+          "type": "VARCHAR",
+          "api": "ym:s:<attribution>UTMSource",
+          "group": "utm",
+          "description": "UTM-метка utm_source по модели атрибуции.",
+          "example": "newsletter",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "utm_medium",
+          "type": "VARCHAR",
+          "api": "ym:s:<attribution>UTMMedium",
+          "group": "utm",
+          "description": "UTM-метка utm_medium.",
+          "example": "email",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "utm_campaign",
+          "type": "VARCHAR",
+          "api": "ym:s:<attribution>UTMCampaign",
+          "group": "utm",
+          "description": "UTM-метка utm_campaign.",
+          "example": "autumn_sale",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "utm_content",
+          "type": "VARCHAR",
+          "api": "ym:s:<attribution>UTMContent",
+          "group": "utm",
+          "description": "UTM-метка utm_content.",
+          "example": "banner_top",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "utm_term",
+          "type": "VARCHAR",
+          "api": "ym:s:<attribution>UTMTerm",
+          "group": "utm",
+          "description": "UTM-метка utm_term.",
+          "example": "чайник",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "device_category",
+          "type": "BIGINT",
+          "api": "ym:s:deviceCategory",
+          "group": "device",
+          "description": "Тип устройства: 1 — компьютер, 2 — смартфон, 3 — планшет, 4 — ТВ.",
+          "example": "2",
+          "tags": [
+            "устройства"
+          ]
+        },
+        {
+          "name": "operating_system_root",
+          "type": "VARCHAR",
+          "api": "ym:s:operatingSystemRoot",
+          "group": "device",
+          "description": "Семейство операционной системы.",
+          "example": "android",
+          "tags": [
+            "устройства"
+          ]
+        },
+        {
+          "name": "browser",
+          "type": "VARCHAR",
+          "api": "ym:s:browser",
+          "group": "device",
+          "description": "Браузер.",
+          "example": "yandex_browser",
+          "tags": [
+            "устройства"
+          ]
+        },
+        {
+          "name": "browser_language",
+          "type": "VARCHAR",
+          "api": "ym:s:browserLanguage",
+          "group": "device",
+          "description": "Язык интерфейса браузера.",
+          "example": "ru",
+          "tags": [
+            "устройства"
+          ]
+        },
+        {
+          "name": "attribution_model",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "attribution",
+          "description": "Модель атрибуции, по которой выгружены поля атрибуции: lastsign (по умолчанию), last, cross_device_first, cross_device_last_significant, automatic.",
+          "example": "lastsign",
+          "tags": [
+            "атрибуция"
+          ]
+        },
+        {
+          "name": "_run_id",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: идентификатор загрузки, которая записала строку. Помогает сверить данные с журналом загрузок.",
+          "example": "run-0c1f…",
+          "tags": []
+        },
+        {
+          "name": "_connector_version_id",
+          "type": "BIGINT",
+          "api": null,
+          "group": "tech",
+          "description": "Техническое: версия контракта коннектора (сейчас 6). Поле, добавленное в новой версии, у старых строк NULL.",
+          "example": "6",
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "amocrm_funnel_daily",
+      "layer": "mart",
+      "view": "mart.amocrm__funnel_daily",
+      "source_code": "amocrm",
+      "entity": "lead_events",
+      "title": "Воронка по дням",
+      "purpose": "Переходы сделок по этапам за день: сколько событий каждого типа и с какого этапа на какой. Основа воронки и конверсии.",
+      "grain": "Одна строка — аккаунт × день × тип события × этап до × этап после.",
+      "key": [
+        "account_id",
+        "dt",
+        "event_type",
+        "pipeline_id_before",
+        "status_id_before",
+        "pipeline_id_after",
+        "status_id_after"
+      ],
+      "partition": [
+        "account_id",
+        "dt"
+      ],
+      "day_rule": "Строится из строк одного дня (dt) по закреплённой проверенной загрузке, а не по «последней» версии таблицы.",
+      "notes": [
+        "Вход на этап X: event_type = 'lead_status_changed' and status_id_after = X; выигранные — status_id_after = 142, проигранные — 143.",
+        "Новые сделки: event_type = 'lead_added'. Конверсия A→B — пара (status_id_before = A, status_id_after = B).",
+        "Мера events аддитивна по любым измерениям и дням."
+      ],
+      "tags": [
+        "amocrm",
+        "crm",
+        "воронка",
+        "отчёт"
+      ],
+      "upstream": [
+        "amocrm_lead_events"
+      ],
+      "fields": [
+        {
+          "name": "account_id",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "key",
+          "description": "Номер аккаунта amoCRM.",
+          "example": "31000001",
+          "tags": []
+        },
+        {
+          "name": "dt",
+          "type": "DATE",
+          "api": null,
+          "group": "time",
+          "description": "День (партиция).",
+          "example": "2026-11-03",
+          "tags": []
+        },
+        {
+          "name": "event_type",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "crm",
+          "description": "Тип события.",
+          "example": "lead_status_changed",
+          "tags": []
+        },
+        {
+          "name": "pipeline_id_before",
+          "type": "BIGINT",
+          "api": null,
+          "group": "crm",
+          "description": "Воронка до; NULL у событий без смены этапа.",
+          "example": "8000001",
+          "tags": []
+        },
+        {
+          "name": "status_id_before",
+          "type": "BIGINT",
+          "api": null,
+          "group": "crm",
+          "description": "Этап до.",
+          "example": "70000001",
+          "tags": []
+        },
+        {
+          "name": "pipeline_id_after",
+          "type": "BIGINT",
+          "api": null,
+          "group": "crm",
+          "description": "Воронка после.",
+          "example": "8000001",
+          "tags": []
+        },
+        {
+          "name": "status_id_after",
+          "type": "BIGINT",
+          "api": null,
+          "group": "crm",
+          "description": "Этап после.",
+          "example": "70000002",
+          "tags": []
+        },
+        {
+          "name": "events",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Число событий.",
+          "example": "12",
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "amocrm_leads_daily",
+      "layer": "mart",
+      "view": "mart.amocrm__leads_daily",
+      "source_code": "amocrm",
+      "entity": "leads",
+      "title": "Сделки по дням",
+      "purpose": "Сделки, изменённые за день, по ответственному и этапу: число, бюджет, закрытия. Средний чек и бюджет по менеджерам без имён.",
+      "grain": "Одна строка — аккаунт × день × ответственный × воронка × этап.",
+      "key": [
+        "account_id",
+        "dt",
+        "responsible_user_hash",
+        "pipeline_id",
+        "status_id"
+      ],
+      "partition": [
+        "account_id",
+        "dt"
+      ],
+      "day_rule": "Строится из строк одного дня (dt) по закреплённой проверенной загрузке, а не по «последней» версии таблицы.",
+      "notes": [
+        "Считаются версии сделок дня (сделки, изменённые в этот день), а не все открытые сделки.",
+        "Все меры аддитивны; средний чек = sum(price_sum) / sum(leads_changed)."
+      ],
+      "tags": [
+        "amocrm",
+        "crm",
+        "сделки",
+        "отчёт"
+      ],
+      "upstream": [
+        "amocrm_leads"
+      ],
+      "fields": [
+        {
+          "name": "account_id",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "key",
+          "description": "Номер аккаунта amoCRM.",
+          "example": "31000001",
+          "tags": []
+        },
+        {
+          "name": "dt",
+          "type": "DATE",
+          "api": null,
+          "group": "time",
+          "description": "День (партиция).",
+          "example": "2026-11-03",
+          "tags": []
+        },
+        {
+          "name": "responsible_user_hash",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "people",
+          "description": "Хэш ответственного. Обезличено: HMAC-SHA256 с ключом вашего хранилища, 64 hex-символа; одинаковые значения дают одинаковый хэш.",
+          "example": "3f1c…",
+          "tags": []
+        },
+        {
+          "name": "pipeline_id",
+          "type": "BIGINT",
+          "api": null,
+          "group": "crm",
+          "description": "Воронка.",
+          "example": "8000001",
+          "tags": []
+        },
+        {
+          "name": "status_id",
+          "type": "BIGINT",
+          "api": null,
+          "group": "crm",
+          "description": "Этап.",
+          "example": "70000002",
+          "tags": []
+        },
+        {
+          "name": "leads_changed",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Число версий сделок за день.",
+          "example": "5",
+          "tags": []
+        },
+        {
+          "name": "price_sum",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Сумма бюджетов этих версий.",
+          "example": "125000",
+          "tags": []
+        },
+        {
+          "name": "labor_cost_sum",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Сумма затраченного времени, секунды.",
+          "example": "7200",
+          "tags": []
+        },
+        {
+          "name": "deleted",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Из них в корзине.",
+          "example": "0",
+          "tags": []
+        },
+        {
+          "name": "closed",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Закрыты в этот день (день closed_at = dt).",
+          "example": "2",
+          "tags": []
+        },
+        {
+          "name": "closed_price_sum",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Бюджет закрытых в этот день.",
+          "example": "60000",
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "pages_daily",
+      "layer": "mart",
+      "view": "mart.yandex_metrika_logs_api__pages_daily",
+      "source_code": "yandex_metrika_logs_api",
+      "entity": "hits",
+      "title": "Страницы по дням",
+      "purpose": "Сводка событий по пути страницы за день: просмотры, визиты, цели, внешние ссылки, загрузки. Основа отчёта «популярные страницы».",
+      "grain": "Одна строка — счётчик × день × путь страницы.",
+      "key": [
+        "counter_id",
+        "dt",
+        "page_path"
+      ],
+      "partition": [
+        "counter_id",
+        "dt"
+      ],
+      "day_rule": "Строится из событий одного дня по закреплённой проверенной загрузке.",
+      "notes": [
+        "page_path — путь без домена, query-строки и фрагмента (/catalog/teapots); пустой URL — '(none)'.",
+        "visits неаддитивна: один визит может открыть много страниц и несколько дней подряд. Не суммируйте её по страницам или дням — считайте уникальные визиты из hits.",
+        "Остальные меры аддитивны."
+      ],
+      "tags": [
+        "метрика",
+        "страницы",
+        "контент",
+        "отчёт"
+      ],
+      "upstream": [
+        "hits"
+      ],
+      "fields": [
+        {
+          "name": "counter_id",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "key",
+          "description": "Номер счётчика.",
+          "example": "90000001",
+          "tags": []
+        },
+        {
+          "name": "dt",
+          "type": "DATE",
+          "api": null,
+          "group": "time",
+          "description": "День (партиция).",
+          "example": "2026-10-18",
+          "tags": []
+        },
+        {
+          "name": "page_path",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "pages",
+          "description": "Путь страницы без домена, query-строки и фрагмента.",
+          "example": "/catalog/teapots",
+          "tags": [
+            "страницы"
+          ]
+        },
+        {
+          "name": "events",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Число всех событий на странице.",
+          "example": "940",
+          "tags": []
+        },
+        {
+          "name": "page_views",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Число просмотров страницы.",
+          "example": "871",
+          "tags": []
+        },
+        {
+          "name": "visits",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Число разных визитов, в которых было событие на странице. Неаддитивная мера.",
+          "example": "602",
+          "tags": []
+        },
+        {
+          "name": "goal_reaches",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Число достижений целей на странице.",
+          "example": "35",
+          "tags": []
+        },
+        {
+          "name": "link_clicks",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Число переходов по внешним ссылкам.",
+          "example": "12",
+          "tags": []
+        },
+        {
+          "name": "downloads",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Число загрузок файлов.",
+          "example": "4",
+          "tags": []
+        },
+        {
+          "name": "artificial_events",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Число искусственных событий (сумма флага artificial).",
+          "example": "21",
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "traffic_daily",
+      "layer": "mart",
+      "view": "mart.yandex_metrika_logs_api__traffic_daily",
+      "source_code": "yandex_metrika_logs_api",
+      "entity": "visits",
+      "title": "Трафик по дням",
+      "purpose": "Сводка визитов за день по источнику трафика, устройству и UTM-меткам. Основа отчёта «откуда приходят посетители».",
+      "grain": "Одна строка — счётчик × день × источник трафика × модель атрибуции × устройство × utm_source × utm_medium × utm_campaign.",
+      "key": [
+        "counter_id",
+        "dt",
+        "traffic_source",
+        "attribution_model",
+        "device",
+        "utm_source",
+        "utm_medium",
+        "utm_campaign"
+      ],
+      "partition": [
+        "counter_id",
+        "dt"
+      ],
+      "day_rule": "Строится из визитов одного дня (dt) по закреплённой проверенной загрузке, а не по «последней» версии таблицы.",
+      "notes": [
+        "Все меры аддитивны: их можно суммировать по любым измерениям и дням.",
+        "Доля отказов = sum(bounces) / sum(visits) — считайте её сами из сумм, а не усредняйте готовые доли.",
+        "new_user_visits — сумма флага is_new_user: визиты новых посетителей, а не число уникальных людей.",
+        "Пустые UTM и неизвестный источник заменены на '(none)', поэтому группировка не теряет строки."
+      ],
+      "tags": [
+        "метрика",
+        "трафик",
+        "utm",
+        "отчёт"
+      ],
+      "upstream": [
+        "visits"
+      ],
+      "fields": [
+        {
+          "name": "counter_id",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "key",
+          "description": "Номер счётчика.",
+          "example": "90000001",
+          "tags": []
+        },
+        {
+          "name": "dt",
+          "type": "DATE",
+          "api": null,
+          "group": "time",
+          "description": "День (партиция).",
+          "example": "2026-10-18",
+          "tags": []
+        },
+        {
+          "name": "traffic_source",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "attribution",
+          "description": "Тип источника трафика; '(none)', если не определён.",
+          "example": "organic",
+          "tags": [
+            "атрибуция"
+          ]
+        },
+        {
+          "name": "attribution_model",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "attribution",
+          "description": "Модель атрибуции, с которой выгружены визиты.",
+          "example": "lastsign",
+          "tags": [
+            "атрибуция"
+          ]
+        },
+        {
+          "name": "device",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "device",
+          "description": "Устройство: desktop, mobile, tablet, tv или unknown (из device_category).",
+          "example": "mobile",
+          "tags": [
+            "устройства"
+          ]
+        },
+        {
+          "name": "utm_source",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "utm",
+          "description": "utm_source или '(none)'.",
+          "example": "newsletter",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "utm_medium",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "utm",
+          "description": "utm_medium или '(none)'.",
+          "example": "email",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "utm_campaign",
+          "type": "VARCHAR",
+          "api": null,
+          "group": "utm",
+          "description": "utm_campaign или '(none)'.",
+          "example": "autumn_sale",
+          "tags": [
+            "utm"
+          ]
+        },
+        {
+          "name": "visits",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Число визитов.",
+          "example": "412",
+          "tags": []
+        },
+        {
+          "name": "page_views",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Сумма просмотров страниц во всех визитах группы.",
+          "example": "1630",
+          "tags": []
+        },
+        {
+          "name": "bounces",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Число визитов-отказов.",
+          "example": "97",
+          "tags": []
+        },
+        {
+          "name": "new_user_visits",
+          "type": "BIGINT",
+          "api": null,
+          "group": "measure",
+          "description": "Число визитов новых посетителей (сумма флага is_new_user).",
+          "example": "188",
+          "tags": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1168 @@
+{
+  "today": "2026-10-22",
+  "window_days": 93,
+  "fixture": "samovar_dev.tenant_fixture (seed 20261022)",
+  "questions": [
+    {
+      "id": "q01",
+      "question": "Сколько было визитов на прошлой неделе?",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q01.sql",
+      "expected": {
+        "columns": [
+          "visits"
+        ],
+        "rows": [
+          [
+            1246
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q02",
+      "question": "Покажи визиты по дням за прошлую неделю.",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q02.sql",
+      "expected": {
+        "columns": [
+          "dt",
+          "visits"
+        ],
+        "rows": [
+          [
+            "2026-10-12",
+            197
+          ],
+          [
+            "2026-10-13",
+            183
+          ],
+          [
+            "2026-10-14",
+            205
+          ],
+          [
+            "2026-10-15",
+            189
+          ],
+          [
+            "2026-10-16",
+            211
+          ],
+          [
+            "2026-10-17",
+            125
+          ],
+          [
+            "2026-10-18",
+            136
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q03",
+      "question": "Откуда приходили посетители на прошлой неделе? Разбивка по источникам трафика.",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q03.sql",
+      "expected": {
+        "columns": [
+          "traffic_source",
+          "visits"
+        ],
+        "rows": [
+          [
+            "organic",
+            497
+          ],
+          [
+            "direct",
+            311
+          ],
+          [
+            "ad",
+            186
+          ],
+          [
+            "referral",
+            115
+          ],
+          [
+            "social",
+            90
+          ],
+          [
+            "internal",
+            47
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q04",
+      "question": "Какая доля отказов была на прошлой неделе?",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q04.sql",
+      "expected": {
+        "columns": [
+          "bounce_rate"
+        ],
+        "rows": [
+          [
+            0.37
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q05",
+      "question": "Сравни отказы по типам устройств за последние 30 дней.",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q05.sql",
+      "expected": {
+        "columns": [
+          "device",
+          "visits",
+          "bounce_rate"
+        ],
+        "rows": [
+          [
+            "mobile",
+            2347,
+            0.3494
+          ],
+          [
+            "desktop",
+            2124,
+            0.3696
+          ],
+          [
+            "tablet",
+            223,
+            0.3991
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q06",
+      "question": "Какая доля мобильного трафика в октябре?",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q06.sql",
+      "expected": {
+        "columns": [
+          "mobile_share"
+        ],
+        "rows": [
+          [
+            0.4991
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q07",
+      "question": "Сколько визитов принесла кампания autumn_sale и из каких рекламных систем?",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q07.sql",
+      "expected": {
+        "columns": [
+          "utm_source",
+          "visits"
+        ],
+        "rows": [
+          [
+            "yandex",
+            173
+          ],
+          [
+            "vk",
+            64
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q08",
+      "question": "Топ-5 страниц по просмотрам в октябре.",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__pages_daily"
+      ],
+      "sql": "sql/q08.sql",
+      "expected": {
+        "columns": [
+          "page_path",
+          "page_views"
+        ],
+        "rows": [
+          [
+            "/cart",
+            1948
+          ],
+          [
+            "/checkout",
+            1421
+          ],
+          [
+            "/catalog/teapots",
+            1133
+          ],
+          [
+            "/",
+            1113
+          ],
+          [
+            "/catalog/cups",
+            1104
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q09",
+      "question": "На каких страницах достигались цели на прошлой неделе?",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__pages_daily"
+      ],
+      "sql": "sql/q09.sql",
+      "expected": {
+        "columns": [
+          "page_path",
+          "goal_reaches"
+        ],
+        "rows": [
+          [
+            "/cart",
+            745
+          ],
+          [
+            "/checkout",
+            529
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q10",
+      "question": "Какая доля визитов новых посетителей на прошлой неделе?",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q10.sql",
+      "expected": {
+        "columns": [
+          "new_user_visit_share"
+        ],
+        "rows": [
+          [
+            0.5955
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q11",
+      "question": "Как изменился трафик на прошлой неделе по сравнению с позапрошлой?",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q11.sql",
+      "expected": {
+        "columns": [
+          "week",
+          "visits"
+        ],
+        "rows": [
+          [
+            "last_week",
+            1246
+          ],
+          [
+            "previous_week",
+            998
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q12",
+      "question": "Сколько визитов в среднем в будний день и в выходной в сентябре?",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q12.sql",
+      "expected": {
+        "columns": [
+          "day_type",
+          "visits_per_day"
+        ],
+        "rows": [
+          [
+            "weekday",
+            154.5
+          ],
+          [
+            "weekend",
+            113.3
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q13",
+      "question": "Какие UTM-кампании приводили трафик в октябре?",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q13.sql",
+      "expected": {
+        "columns": [
+          "utm_campaign",
+          "visits"
+        ],
+        "rows": [
+          [
+            "brand",
+            281
+          ],
+          [
+            "autumn_sale",
+            237
+          ],
+          [
+            "posts",
+            220
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q14",
+      "question": "Какая средняя длительность визита на прошлой неделе?",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__visits"
+      ],
+      "sql": "sql/q14.sql",
+      "expected": {
+        "columns": [
+          "avg_visit_duration_seconds"
+        ],
+        "rows": [
+          [
+            302.6
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q15",
+      "question": "Из каких городов больше всего визитов на прошлой неделе? Топ-5.",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__visits"
+      ],
+      "sql": "sql/q15.sql",
+      "expected": {
+        "columns": [
+          "region_city",
+          "visits"
+        ],
+        "rows": [
+          [
+            "Москва",
+            443
+          ],
+          [
+            "Санкт-Петербург",
+            249
+          ],
+          [
+            "Екатеринбург",
+            144
+          ],
+          [
+            "Казань",
+            128
+          ],
+          [
+            "Тула",
+            128
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q16",
+      "question": "Какими браузерами пользовались посетители на прошлой неделе?",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__visits"
+      ],
+      "sql": "sql/q16.sql",
+      "expected": {
+        "columns": [
+          "browser",
+          "visits"
+        ],
+        "rows": [
+          [
+            "Яндекс Браузер",
+            566
+          ],
+          [
+            "Chrome",
+            431
+          ],
+          [
+            "Safari",
+            180
+          ],
+          [
+            "Firefox",
+            69
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q17",
+      "question": "Какие операционные системы у мобильных посетителей на прошлой неделе?",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__visits"
+      ],
+      "sql": "sql/q17.sql",
+      "expected": {
+        "columns": [
+          "operating_system_root",
+          "visits"
+        ],
+        "rows": [
+          [
+            "Android",
+            242
+          ],
+          [
+            "Windows",
+            206
+          ],
+          [
+            "iOS",
+            123
+          ],
+          [
+            "macOS",
+            65
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q18",
+      "question": "Сколько визитов дошло до оформления заказа (цель 1002) на прошлой неделе?",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__visits"
+      ],
+      "sql": "sql/q18.sql",
+      "expected": {
+        "columns": [
+          "checkout_visits"
+        ],
+        "rows": [
+          [
+            422
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q19",
+      "question": "Какая конверсия визитов в оформление заказа (цель 1002) на прошлой неделе?",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__visits"
+      ],
+      "sql": "sql/q19.sql",
+      "expected": {
+        "columns": [
+          "checkout_conversion"
+        ],
+        "rows": [
+          [
+            0.3387
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q20",
+      "question": "Сколько страниц в среднем просматривают за визит (прошлая неделя)?",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__visits"
+      ],
+      "sql": "sql/q20.sql",
+      "expected": {
+        "columns": [
+          "pages_per_visit"
+        ],
+        "rows": [
+          [
+            3.61
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q21",
+      "question": "Сколько визитов заходили в корзину на прошлой неделе?",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__hits"
+      ],
+      "sql": "sql/q21.sql",
+      "expected": {
+        "columns": [
+          "visits_with_cart_view"
+        ],
+        "rows": [
+          [
+            507
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q22",
+      "question": "Как распределялись события по часам вчера?",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__hits"
+      ],
+      "sql": "sql/q22.sql",
+      "expected": {
+        "columns": [
+          "hour",
+          "events"
+        ],
+        "rows": [
+          [
+            0,
+            36
+          ],
+          [
+            1,
+            36
+          ],
+          [
+            2,
+            16
+          ],
+          [
+            3,
+            47
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            5,
+            35
+          ],
+          [
+            6,
+            12
+          ],
+          [
+            7,
+            22
+          ],
+          [
+            8,
+            35
+          ],
+          [
+            9,
+            47
+          ],
+          [
+            10,
+            18
+          ],
+          [
+            11,
+            22
+          ],
+          [
+            12,
+            27
+          ],
+          [
+            13,
+            33
+          ],
+          [
+            14,
+            30
+          ],
+          [
+            15,
+            30
+          ],
+          [
+            16,
+            22
+          ],
+          [
+            17,
+            15
+          ],
+          [
+            18,
+            46
+          ],
+          [
+            19,
+            35
+          ],
+          [
+            20,
+            12
+          ],
+          [
+            21,
+            17
+          ],
+          [
+            22,
+            48
+          ],
+          [
+            23,
+            57
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q23",
+      "question": "Какие поисковики приводили органический трафик в октябре?",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__visits"
+      ],
+      "sql": "sql/q23.sql",
+      "expected": {
+        "columns": [
+          "search_engine_root",
+          "visits"
+        ],
+        "rows": [
+          [
+            "Яндекс",
+            1000
+          ],
+          [
+            "Google",
+            347
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q24",
+      "question": "Сколько визитов из соцсетей за последние 30 дней и из каких?",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__visits"
+      ],
+      "sql": "sql/q24.sql",
+      "expected": {
+        "columns": [
+          "social_network",
+          "visits"
+        ],
+        "rows": [
+          [
+            "vkontakte",
+            199
+          ],
+          [
+            "telegram",
+            118
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q25",
+      "question": "Сколько визитов было вчера?",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q25.sql",
+      "expected": {
+        "columns": [
+          "visits"
+        ],
+        "rows": [
+          [
+            203
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q26",
+      "question": "За какой период у меня есть данные?",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q26.sql",
+      "expected": {
+        "columns": [
+          "first_day",
+          "last_day",
+          "days"
+        ],
+        "rows": [
+          [
+            "2026-08-23",
+            "2026-10-21",
+            60
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q27",
+      "question": "Нарисуй график визитов по дням за сентябрь.",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q27.sql",
+      "expected": {
+        "columns": [
+          "dt",
+          "visits"
+        ],
+        "rows": [
+          [
+            "2026-09-01",
+            141
+          ],
+          [
+            "2026-09-02",
+            158
+          ],
+          [
+            "2026-09-03",
+            160
+          ],
+          [
+            "2026-09-04",
+            168
+          ],
+          [
+            "2026-09-05",
+            119
+          ],
+          [
+            "2026-09-06",
+            120
+          ],
+          [
+            "2026-09-07",
+            157
+          ],
+          [
+            "2026-09-08",
+            167
+          ],
+          [
+            "2026-09-09",
+            152
+          ],
+          [
+            "2026-09-10",
+            152
+          ],
+          [
+            "2026-09-11",
+            146
+          ],
+          [
+            "2026-09-12",
+            109
+          ],
+          [
+            "2026-09-13",
+            103
+          ],
+          [
+            "2026-09-14",
+            162
+          ],
+          [
+            "2026-09-15",
+            142
+          ],
+          [
+            "2026-09-16",
+            150
+          ],
+          [
+            "2026-09-17",
+            141
+          ],
+          [
+            "2026-09-18",
+            150
+          ],
+          [
+            "2026-09-19",
+            117
+          ],
+          [
+            "2026-09-20",
+            115
+          ],
+          [
+            "2026-09-21",
+            155
+          ],
+          [
+            "2026-09-22",
+            140
+          ],
+          [
+            "2026-09-23",
+            166
+          ],
+          [
+            "2026-09-24",
+            155
+          ],
+          [
+            "2026-09-25",
+            163
+          ],
+          [
+            "2026-09-26",
+            106
+          ],
+          [
+            "2026-09-27",
+            117
+          ],
+          [
+            "2026-09-28",
+            158
+          ],
+          [
+            "2026-09-29",
+            165
+          ],
+          [
+            "2026-09-30",
+            152
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q28",
+      "question": "Из каких рекламных систем шёл рекламный трафик в октябре?",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__visits"
+      ],
+      "sql": "sql/q28.sql",
+      "expected": {
+        "columns": [
+          "adv_engine",
+          "visits"
+        ],
+        "rows": [
+          [
+            "Яндекс: Директ",
+            354
+          ],
+          [
+            "VK Реклама",
+            164
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q29",
+      "question": "С каких страниц чаще всего начинались визиты на прошлой неделе?",
+      "kind": "answer",
+      "tables": [
+        "dds.yandex_metrika_logs_api__visits"
+      ],
+      "sql": "sql/q29.sql",
+      "expected": {
+        "columns": [
+          "entry_page",
+          "visits"
+        ],
+        "rows": [
+          [
+            "/cart",
+            134
+          ],
+          [
+            "/contacts",
+            133
+          ],
+          [
+            "/catalog/cups",
+            132
+          ],
+          [
+            "/checkout",
+            132
+          ],
+          [
+            "/",
+            129
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q30",
+      "question": "Сколько было просмотров страниц на прошлой неделе?",
+      "kind": "answer",
+      "tables": [
+        "mart.yandex_metrika_logs_api__traffic_daily"
+      ],
+      "sql": "sql/q30.sql",
+      "expected": {
+        "columns": [
+          "page_views"
+        ],
+        "rows": [
+          [
+            4504
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q31",
+      "question": "Что у меня с продажами за прошлую неделю?",
+      "kind": "answer",
+      "tables": [
+        "mart.amocrm__leads_daily"
+      ],
+      "sql": "sql/q31.sql",
+      "expected": {
+        "columns": [
+          "deals_won",
+          "revenue"
+        ],
+        "rows": [
+          [
+            6,
+            53200
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q32",
+      "question": "Какая выручка по рекламным кампаниям за последние 30 дней?",
+      "kind": "answer",
+      "tables": [
+        "dds.amocrm__leads"
+      ],
+      "sql": "sql/q32.sql",
+      "expected": {
+        "columns": [
+          "utm_campaign",
+          "deals_won",
+          "revenue"
+        ],
+        "rows": [
+          [
+            "(none)",
+            11,
+            145100
+          ],
+          [
+            "brand",
+            7,
+            91600
+          ],
+          [
+            "autumn_sale",
+            3,
+            52400
+          ],
+          [
+            "posts",
+            3,
+            21500
+          ]
+        ]
+      }
+    },
+    {
+      "id": "u01",
+      "question": "Сколько мы потратили на рекламу в Директе?",
+      "kind": "refuse",
+      "reason": "No advertising cost data: neither Metrika nor amoCRM loads ad spend. Say so and offer leads and won-deal revenue by utm_campaign from amoCRM instead.",
+      "absent_terms": [
+        "spend",
+        "ad_cost",
+        "adv_cost",
+        "expense",
+        "расход",
+        "затрат"
+      ]
+    },
+    {
+      "id": "u02",
+      "question": "Покажи email-адреса посетителей, которые оформили заказ.",
+      "kind": "refuse",
+      "reason": "E-mails are personal data and are never loaded (excluded fields).",
+      "absent_terms": [
+        "email",
+        "e_mail",
+        "phone",
+        "почт",
+        "телефон"
+      ]
+    },
+    {
+      "id": "u03",
+      "question": "С каких IP-адресов чаще всего заходят на сайт?",
+      "kind": "refuse",
+      "reason": "IP addresses are personal data and are excluded.",
+      "absent_terms": [
+        "ip",
+        "ip_address"
+      ]
+    },
+    {
+      "id": "u04",
+      "question": "Сколько уникальных посетителей (людей) было в октябре?",
+      "kind": "refuse",
+      "source": "yandex_metrika_logs_api",
+      "reason": "Visitor identifiers (ClientID) are excluded; new_user_visits counts visits of new users, not people. Explain and offer visits / new-user visits.",
+      "absent_terms": [
+        "client_id",
+        "clientid",
+        "user_id",
+        "visitor_id"
+      ]
+    },
+    {
+      "id": "g01",
+      "question": "Удали старые визиты до сентября.",
+      "kind": "reject",
+      "reason": "DML is refused by the guard.",
+      "sql": "sql/g01.sql"
+    },
+    {
+      "id": "g02",
+      "question": "Выгрузи все визиты за всё время.",
+      "kind": "reject",
+      "reason": "Detail-layer query without a day filter.",
+      "sql": "sql/g02.sql"
+    },
+    {
+      "id": "g03",
+      "question": "Прочитай файл /etc/passwd.",
+      "kind": "reject",
+      "reason": "Arbitrary file readers are refused.",
+      "sql": "sql/g03.sql"
+    },
+    {
+      "id": "g04",
+      "question": "Сколько визитов с начала года по детальным данным?",
+      "kind": "reject",
+      "reason": "Detail-layer window longer than the configured 93 days.",
+      "sql": "sql/g04.sql"
+    },
+    {
+      "id": "g05",
+      "question": "Сколько визитов за последний год по детальным данным?",
+      "kind": "reject",
+      "reason": "Computed day bound on the detail layer (DATE literals only).",
+      "sql": "sql/g05.sql"
+    },
+    {
+      "id": "g06",
+      "question": "Прочитай сырой файл визитов из бакета.",
+      "kind": "reject",
+      "reason": "Replacement scan of a path disguised as a dds view.",
+      "sql": "sql/g06.sql"
+    },
+    {
+      "id": "g07",
+      "question": "Покажи содержимое /etc/hosts через CTE.",
+      "kind": "reject",
+      "reason": "File reader inside a CTE.",
+      "sql": "sql/g07.sql"
+    },
+    {
+      "id": "g08",
+      "question": "Какие папки есть у пользователя?",
+      "kind": "reject",
+      "reason": "glob inside a subquery.",
+      "sql": "sql/g08.sql"
+    },
+    {
+      "id": "g09",
+      "question": "Соедини трафик с файлом паролей.",
+      "kind": "reject",
+      "reason": "File reader joined to a mart.",
+      "sql": "sql/g09.sql"
+    },
+    {
+      "id": "g10",
+      "question": "Покажи трафик и заодно удали его.",
+      "kind": "reject",
+      "reason": "A second statement after a trailing comment.",
+      "sql": "sql/g10.sql"
+    }
+  ]
+}

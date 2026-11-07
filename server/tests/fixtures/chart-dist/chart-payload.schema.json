@@ -1,0 +1,303 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://samovardata.ru/spec/chart/v1/chart-payload.schema.json",
+  "title": "Input of samovar-chart (mount/buildOption)",
+  "x-schema-version": 1,
+  "$defs": {
+    "ChartColumn": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "description": "DuckDB type of the result column.",
+          "title": "Type",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ColumnKind"
+        },
+        "label": {
+          "description": "Human label: the agent's label for the column, or the column name.",
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "kind",
+        "label"
+      ],
+      "title": "ChartColumn",
+      "type": "object"
+    },
+    "ChartData": {
+      "additionalProperties": false,
+      "properties": {
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/ChartColumn"
+          },
+          "title": "Columns",
+          "type": "array"
+        },
+        "rows": {
+          "items": {
+            "items": {},
+            "type": "array"
+          },
+          "title": "Rows",
+          "type": "array"
+        }
+      },
+      "required": [
+        "columns",
+        "rows"
+      ],
+      "title": "ChartData",
+      "type": "object"
+    },
+    "ChartKind": {
+      "enum": [
+        "line",
+        "bar",
+        "barh",
+        "area",
+        "scatter"
+      ],
+      "title": "ChartKind",
+      "type": "string"
+    },
+    "ChartSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/ChartKind"
+        },
+        "title": {
+          "maxLength": 200,
+          "title": "Title",
+          "type": "string"
+        },
+        "x": {
+          "description": "Result column on the x axis (categories for bar charts).",
+          "title": "X",
+          "type": "string"
+        },
+        "y": {
+          "description": "Numeric result columns, one series each.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "Y",
+          "type": "array"
+        },
+        "series": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional column whose values split a single y column into several series.",
+          "title": "Series"
+        },
+        "x_title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "X Title"
+        },
+        "y_title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Y Title"
+        },
+        "stacked": {
+          "default": false,
+          "title": "Stacked",
+          "type": "boolean"
+        },
+        "labels": {
+          "additionalProperties": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": "Human labels by result column name (legend, axes, table header), set by the agent. Without a label the column name is shown.",
+          "maxProperties": 20,
+          "title": "Labels",
+          "type": "object"
+        }
+      },
+      "required": [
+        "kind",
+        "title",
+        "x",
+        "y"
+      ],
+      "title": "ChartSpec",
+      "type": "object"
+    },
+    "ColumnKind": {
+      "enum": [
+        "number",
+        "time",
+        "text"
+      ],
+      "title": "ColumnKind",
+      "type": "string"
+    },
+    "Palette": {
+      "additionalProperties": false,
+      "properties": {
+        "background": {
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "title": "Background",
+          "type": "string"
+        },
+        "surface": {
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "title": "Surface",
+          "type": "string"
+        },
+        "text": {
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "title": "Text",
+          "type": "string"
+        },
+        "muted": {
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "title": "Muted",
+          "type": "string"
+        },
+        "border": {
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "title": "Border",
+          "type": "string"
+        },
+        "primary": {
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "title": "Primary",
+          "type": "string"
+        },
+        "accent": {
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "title": "Accent",
+          "type": "string"
+        },
+        "series": {
+          "description": "Series colours in order; the first is the primary colour.",
+          "items": {
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "type": "string"
+          },
+          "maxItems": 12,
+          "minItems": 2,
+          "title": "Series",
+          "type": "array"
+        }
+      },
+      "required": [
+        "background",
+        "surface",
+        "text",
+        "muted",
+        "border",
+        "primary",
+        "accent",
+        "series"
+      ],
+      "title": "Palette",
+      "type": "object"
+    },
+    "Theme": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "font": {
+          "maxLength": 300,
+          "pattern": "^[^<>{};\\\\]*$",
+          "title": "Font",
+          "type": "string"
+        },
+        "mono_font": {
+          "maxLength": 300,
+          "pattern": "^[^<>{};\\\\]*$",
+          "title": "Mono Font",
+          "type": "string"
+        },
+        "radius_px": {
+          "minimum": 0,
+          "title": "Radius Px",
+          "type": "integer"
+        },
+        "light": {
+          "$ref": "#/$defs/Palette"
+        },
+        "dark": {
+          "$ref": "#/$defs/Palette"
+        }
+      },
+      "required": [
+        "schema_version",
+        "font",
+        "mono_font",
+        "radius_px",
+        "light",
+        "dark"
+      ],
+      "title": "Theme",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "spec": {
+      "$ref": "#/$defs/ChartSpec"
+    },
+    "data": {
+      "$ref": "#/$defs/ChartData"
+    },
+    "theme": {
+      "$ref": "#/$defs/Theme"
+    },
+    "footer": {
+      "description": "Provenance line: catalog version, query id, time.",
+      "title": "Footer",
+      "type": "string"
+    }
+  },
+  "required": [
+    "spec",
+    "data",
+    "theme",
+    "footer"
+  ],
+  "type": "object"
+}

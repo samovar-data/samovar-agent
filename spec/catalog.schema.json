@@ -1,0 +1,286 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://samovardata.ru/spec/agent/catalog.schema.json",
+  "title": "Catalog",
+  "$defs": {
+    "Column": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "description": "DuckDB type of the view column.",
+          "title": "Type",
+          "type": "string"
+        },
+        "api": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Field of the source API, if the column maps to one.",
+          "title": "Api"
+        },
+        "group": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Group"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "example": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Synthetic example value, never real data.",
+          "title": "Example"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "description"
+      ],
+      "title": "Column",
+      "type": "object"
+    },
+    "Excluded": {
+      "properties": {
+        "what": {
+          "title": "What",
+          "type": "string"
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "what",
+        "why"
+      ],
+      "title": "Excluded",
+      "type": "object"
+    },
+    "Layer": {
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/LayerId"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "schema": {
+          "description": "SQL schema of the layer's views.",
+          "title": "Schema",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "schema",
+        "summary"
+      ],
+      "title": "Layer",
+      "type": "object"
+    },
+    "LayerId": {
+      "enum": [
+        "dds",
+        "mart"
+      ],
+      "title": "LayerId",
+      "type": "string"
+    },
+    "Source": {
+      "properties": {
+        "code": {
+          "description": "Connector code, e.g. yandex_metrika_logs_api or amocrm.",
+          "title": "Code",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "connector_version": {
+          "title": "Connector Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "code",
+        "title",
+        "connector_version"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "Table": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "layer": {
+          "$ref": "#/$defs/LayerId"
+        },
+        "view": {
+          "description": "Qualified view name, <schema>.<name>.",
+          "title": "View",
+          "type": "string"
+        },
+        "source_code": {
+          "title": "Source Code",
+          "type": "string"
+        },
+        "entity": {
+          "title": "Entity",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "purpose": {
+          "title": "Purpose",
+          "type": "string"
+        },
+        "grain": {
+          "title": "Grain",
+          "type": "string"
+        },
+        "key": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Key",
+          "type": "array"
+        },
+        "partition": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Partition",
+          "type": "array"
+        },
+        "day_rule": {
+          "description": "What the day column means, including its timezone.",
+          "title": "Day Rule",
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        },
+        "tags": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/Column"
+          },
+          "title": "Fields",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "layer",
+        "view",
+        "source_code",
+        "entity",
+        "title",
+        "purpose",
+        "grain",
+        "key",
+        "partition",
+        "day_rule",
+        "notes",
+        "fields"
+      ],
+      "title": "Table",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/Source"
+      },
+      "title": "Sources",
+      "type": "array"
+    },
+    "layers": {
+      "items": {
+        "$ref": "#/$defs/Layer"
+      },
+      "title": "Layers",
+      "type": "array"
+    },
+    "groups": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Groups",
+      "type": "object"
+    },
+    "excluded": {
+      "items": {
+        "$ref": "#/$defs/Excluded"
+      },
+      "title": "Excluded",
+      "type": "array"
+    },
+    "tables": {
+      "items": {
+        "$ref": "#/$defs/Table"
+      },
+      "title": "Tables",
+      "type": "array"
+    }
+  },
+  "required": [
+    "sources",
+    "layers",
+    "groups",
+    "excluded",
+    "tables"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,6 @@
+{
+  "name": "samovar-chart",
+  "version": "0.1.1",
+  "base_url": "https://global.s3.cloud.ru/samovar-data-static/samovar-chart/0.1.1/",
+  "manifest_sha256": "8d9436039a3b960b612b8b10976c58b974f29531ea96046b7aef239c2a95e749"
+}

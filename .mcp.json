@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "samovar": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--frozen",
+        "--quiet",
+        "--no-dev",
+        "--project",
+        "${CLAUDE_PLUGIN_ROOT}/server",
+        "samovar-agent",
+        "serve"
+      ],
+      "env": {
+        "UV_PROJECT_ENVIRONMENT": "${CLAUDE_PLUGIN_DATA}/venv",
+        "SAMOVAR_DATA_DIR": "${CLAUDE_PLUGIN_DATA}",
+        "SAMOVAR_PLUGIN_ROOT": "${CLAUDE_PLUGIN_ROOT}",
+        "SAMOVAR_S3_KEY_ID": "${user_config.s3_key_id}",
+        "SAMOVAR_S3_SECRET": "${user_config.s3_secret}",
+        "SAMOVAR_S3_BUCKET": "${user_config.s3_bucket}",
+        "SAMOVAR_S3_ENDPOINT": "${user_config.s3_endpoint}",
+        "SAMOVAR_S3_REGION": "${user_config.s3_region}",
+        "SAMOVAR_API_URL": "${user_config.api_url}",
+        "SAMOVAR_OUTPUT_DIR": "${user_config.output_dir}"
+      }
+    }
+  }
+}

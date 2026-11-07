@@ -1,0 +1,57 @@
+[project]
+name = "samovar-agent"
+version = "0.1.0"
+description = "Local MCP server for the Samovar Data analyst agent: data catalog, guarded DuckDB queries, ECharts charts and exports"
+license = "BUSL-1.1"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "duckdb==1.5.4",
+    "mcp>=2.3,<3",
+    # Already a mandatory dependency of mcp; declared because tool and catalog models are pydantic models.
+    "pydantic>=2.12,<3",
+    # Already a mandatory dependency of mcp; declared because chart payloads are checked against the JSON Schema
+    # published with the pinned samovar-chart version.
+    "jsonschema>=4.20,<5",
+    "openpyxl>=3.1.5,<4",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.4,<9"]
+
+[dependency-groups]
+dev = [
+    "black>=25.1,<27",
+    "flake8>=7.1,<8",
+    "isort>=5.13,<7",
+    "mypy>=1.15,<2",
+]
+
+[project.scripts]
+samovar-agent = "samovar_agent.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/samovar_agent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+
+[tool.black]
+line-length = 120
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 120
+src_paths = ["src", "tests"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests"]
+mypy_path = "src:."
+plugins = ["pydantic.mypy"]

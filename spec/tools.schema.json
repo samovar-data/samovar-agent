@@ -1,0 +1,910 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://samovardata.ru/spec/agent/tools.schema.json",
+  "title": "samovar-agent MCP tools",
+  "description": "Tool contract of the samovar MCP server: name, description, input and output schema.",
+  "tools": [
+    {
+      "name": "describe_data",
+      "description": "Describe the client's data: sources, layers, tables (with availability for this key), excluded fields,\n        and for one table its grain, key, day rule (with its timezone), notes and columns. Call it before writing SQL.\n        ",
+      "inputSchema": {
+        "properties": {
+          "table": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Table id or view name for full details.",
+            "title": "Table"
+          }
+        },
+        "title": "describe_dataArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Column": {
+            "properties": {
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "type": {
+                "description": "DuckDB type of the view column.",
+                "title": "Type",
+                "type": "string"
+              },
+              "api": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Field of the source API, if the column maps to one.",
+                "title": "Api"
+              },
+              "group": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Group"
+              },
+              "description": {
+                "title": "Description",
+                "type": "string"
+              },
+              "example": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Synthetic example value, never real data.",
+                "title": "Example"
+              }
+            },
+            "required": [
+              "name",
+              "type",
+              "description"
+            ],
+            "title": "Column",
+            "type": "object"
+          },
+          "Excluded": {
+            "properties": {
+              "what": {
+                "title": "What",
+                "type": "string"
+              },
+              "why": {
+                "title": "Why",
+                "type": "string"
+              }
+            },
+            "required": [
+              "what",
+              "why"
+            ],
+            "title": "Excluded",
+            "type": "object"
+          },
+          "Layer": {
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/LayerId"
+              },
+              "title": {
+                "title": "Title",
+                "type": "string"
+              },
+              "schema": {
+                "description": "SQL schema of the layer's views.",
+                "title": "Schema",
+                "type": "string"
+              },
+              "summary": {
+                "title": "Summary",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "schema",
+              "summary"
+            ],
+            "title": "Layer",
+            "type": "object"
+          },
+          "LayerId": {
+            "enum": [
+              "dds",
+              "mart"
+            ],
+            "title": "LayerId",
+            "type": "string"
+          },
+          "Source": {
+            "properties": {
+              "code": {
+                "description": "Connector code, e.g. yandex_metrika_logs_api or amocrm.",
+                "title": "Code",
+                "type": "string"
+              },
+              "title": {
+                "title": "Title",
+                "type": "string"
+              },
+              "connector_version": {
+                "title": "Connector Version",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "code",
+              "title",
+              "connector_version"
+            ],
+            "title": "Source",
+            "type": "object"
+          },
+          "Table": {
+            "properties": {
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "layer": {
+                "$ref": "#/$defs/LayerId"
+              },
+              "view": {
+                "description": "Qualified view name, <schema>.<name>.",
+                "title": "View",
+                "type": "string"
+              },
+              "source_code": {
+                "title": "Source Code",
+                "type": "string"
+              },
+              "entity": {
+                "title": "Entity",
+                "type": "string"
+              },
+              "title": {
+                "title": "Title",
+                "type": "string"
+              },
+              "purpose": {
+                "title": "Purpose",
+                "type": "string"
+              },
+              "grain": {
+                "title": "Grain",
+                "type": "string"
+              },
+              "key": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Key",
+                "type": "array"
+              },
+              "partition": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Partition",
+                "type": "array"
+              },
+              "day_rule": {
+                "description": "What the day column means, including its timezone.",
+                "title": "Day Rule",
+                "type": "string"
+              },
+              "notes": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Notes",
+                "type": "array"
+              },
+              "tags": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Tags",
+                "type": "array"
+              },
+              "fields": {
+                "items": {
+                  "$ref": "#/$defs/Column"
+                },
+                "title": "Fields",
+                "type": "array"
+              }
+            },
+            "required": [
+              "id",
+              "layer",
+              "view",
+              "source_code",
+              "entity",
+              "title",
+              "purpose",
+              "grain",
+              "key",
+              "partition",
+              "day_rule",
+              "notes",
+              "fields"
+            ],
+            "title": "Table",
+            "type": "object"
+          },
+          "TableSummary": {
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "layer": {
+                "title": "Layer",
+                "type": "string"
+              },
+              "view": {
+                "title": "View",
+                "type": "string"
+              },
+              "title": {
+                "title": "Title",
+                "type": "string"
+              },
+              "purpose": {
+                "title": "Purpose",
+                "type": "string"
+              },
+              "available": {
+                "description": "True when the view is present in the tenant's mapping.",
+                "title": "Available",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "layer",
+              "view",
+              "title",
+              "purpose",
+              "available"
+            ],
+            "title": "TableSummary",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "catalog_version": {
+            "title": "Catalog Version",
+            "type": "string"
+          },
+          "today": {
+            "description": "Today in the data's timezone: use it to turn relative periods into DATE literals.",
+            "format": "date",
+            "title": "Today",
+            "type": "string"
+          },
+          "timezone": {
+            "description": "The zone of `today`; each source's day is in that source's own zone.",
+            "title": "Timezone",
+            "type": "string"
+          },
+          "sources": {
+            "description": "The connected sources the catalog describes.",
+            "items": {
+              "$ref": "#/$defs/Source"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "notes": {
+            "description": "Facts to respect, one per source: in which timezone its days are.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "problems": {
+            "description": "Problems with the dates (a timezone fallback).",
+            "items": {
+              "type": "string"
+            },
+            "title": "Problems",
+            "type": "array"
+          },
+          "data_access": {
+            "description": "\"ok\", or why the client data could not be opened (descriptions still apply).",
+            "title": "Data Access",
+            "type": "string"
+          },
+          "layers": {
+            "items": {
+              "$ref": "#/$defs/Layer"
+            },
+            "title": "Layers",
+            "type": "array"
+          },
+          "tables": {
+            "items": {
+              "$ref": "#/$defs/TableSummary"
+            },
+            "title": "Tables",
+            "type": "array"
+          },
+          "excluded": {
+            "items": {
+              "$ref": "#/$defs/Excluded"
+            },
+            "title": "Excluded",
+            "type": "array"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Table"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "catalog_version",
+          "today",
+          "timezone",
+          "sources",
+          "notes",
+          "problems",
+          "data_access",
+          "layers",
+          "tables",
+          "excluded"
+        ],
+        "title": "DescribeDataOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "run_query",
+      "description": "Run one read-only SELECT. Detail-layer (dds) queries must filter the day column; results are capped (see\n        `truncated`). Returns a query_id for make_chart and export.",
+      "inputSchema": {
+        "properties": {
+          "sql": {
+            "description": "One DuckDB SELECT over dds.* / mart.* views.",
+            "title": "Sql",
+            "type": "string"
+          },
+          "purpose": {
+            "description": "What the query answers, in the user's words.",
+            "title": "Purpose",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sql",
+          "purpose"
+        ],
+        "title": "run_queryArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "ResultColumn": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "type": {
+                "title": "Type",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "type"
+            ],
+            "title": "ResultColumn",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "query_id": {
+            "title": "Query Id",
+            "type": "string"
+          },
+          "sql": {
+            "title": "Sql",
+            "type": "string"
+          },
+          "purpose": {
+            "title": "Purpose",
+            "type": "string"
+          },
+          "columns": {
+            "items": {
+              "$ref": "#/$defs/ResultColumn"
+            },
+            "title": "Columns",
+            "type": "array"
+          },
+          "rows": {
+            "items": {
+              "items": {},
+              "type": "array"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "row_count": {
+            "title": "Row Count",
+            "type": "integer"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "elapsed_ms": {
+            "title": "Elapsed Ms",
+            "type": "integer"
+          },
+          "catalog_version": {
+            "title": "Catalog Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query_id",
+          "sql",
+          "purpose",
+          "columns",
+          "rows",
+          "row_count",
+          "truncated",
+          "elapsed_ms",
+          "catalog_version"
+        ],
+        "title": "RunQueryOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "make_chart",
+      "description": "Draw an interactive chart (Apache ECharts, site theme, light/dark) from a stored result as one\n        self-contained HTML page with the data and the SQL; the page has a \"save as PNG\" button.",
+      "inputSchema": {
+        "$defs": {
+          "ChartKind": {
+            "enum": [
+              "line",
+              "bar",
+              "barh",
+              "area",
+              "scatter"
+            ],
+            "title": "ChartKind",
+            "type": "string"
+          },
+          "ChartSpec": {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "$ref": "#/$defs/ChartKind"
+              },
+              "title": {
+                "maxLength": 200,
+                "title": "Title",
+                "type": "string"
+              },
+              "x": {
+                "description": "Result column on the x axis (categories for bar charts).",
+                "title": "X",
+                "type": "string"
+              },
+              "y": {
+                "description": "Numeric result columns, one series each.",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 6,
+                "minItems": 1,
+                "title": "Y",
+                "type": "array"
+              },
+              "series": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Optional column whose values split a single y column into several series.",
+                "title": "Series"
+              },
+              "x_title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "X Title"
+              },
+              "y_title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Y Title"
+              },
+              "stacked": {
+                "default": false,
+                "title": "Stacked",
+                "type": "boolean"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "description": "Human labels by result column name (legend, axes, table header), set by the agent. Without a label the column name is shown.",
+                "maxProperties": 20,
+                "title": "Labels",
+                "type": "object"
+              }
+            },
+            "required": [
+              "kind",
+              "title",
+              "x",
+              "y"
+            ],
+            "title": "ChartSpec",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "query_id": {
+            "title": "Query Id",
+            "type": "string"
+          },
+          "spec": {
+            "$ref": "#/$defs/ChartSpec"
+          }
+        },
+        "required": [
+          "query_id",
+          "spec"
+        ],
+        "title": "make_chartArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "query_id": {
+            "title": "Query Id",
+            "type": "string"
+          },
+          "path": {
+            "description": "Self-contained HTML page with the interactive chart, the data and the SQL.",
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query_id",
+          "path"
+        ],
+        "title": "MakeChartOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "export",
+      "description": "Export the full result of a stored query (re-run up to the export limit) as CSV, JSON or XLSX, with the SQL\n        saved next to it.",
+      "inputSchema": {
+        "$defs": {
+          "ExportFormat": {
+            "enum": [
+              "csv",
+              "json",
+              "xlsx"
+            ],
+            "title": "ExportFormat",
+            "type": "string"
+          }
+        },
+        "properties": {
+          "query_id": {
+            "title": "Query Id",
+            "type": "string"
+          },
+          "format": {
+            "$ref": "#/$defs/ExportFormat"
+          }
+        },
+        "required": [
+          "query_id",
+          "format"
+        ],
+        "title": "exportArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "query_id": {
+            "title": "Query Id",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "sql_path": {
+            "title": "Sql Path",
+            "type": "string"
+          },
+          "row_count": {
+            "title": "Row Count",
+            "type": "integer"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "query_id",
+          "path",
+          "sql_path",
+          "row_count",
+          "truncated"
+        ],
+        "title": "ExportOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "status",
+      "description": "Versions, S3 key and extension readiness, data access state; lists problems with the fix for each.",
+      "inputSchema": {
+        "properties": {},
+        "title": "statusArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "ChartLibraryStatus": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "version": {
+                "title": "Version",
+                "type": "string"
+              },
+              "installed": {
+                "title": "Installed",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "version",
+              "installed"
+            ],
+            "title": "ChartLibraryStatus",
+            "type": "object"
+          },
+          "ExtensionStatus": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "installed": {
+                "title": "Installed",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "installed"
+            ],
+            "title": "ExtensionStatus",
+            "type": "object"
+          },
+          "SessionStatus": {
+            "additionalProperties": false,
+            "properties": {
+              "mode": {
+                "title": "Mode",
+                "type": "string"
+              },
+              "open": {
+                "title": "Open",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "mode",
+              "open"
+            ],
+            "title": "SessionStatus",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "agent_version": {
+            "title": "Agent Version",
+            "type": "string"
+          },
+          "duckdb_version": {
+            "title": "Duckdb Version",
+            "type": "string"
+          },
+          "platform": {
+            "title": "Platform",
+            "type": "string"
+          },
+          "key_configured": {
+            "description": "True when an S3 key is entered; `problems` says if it is incomplete.",
+            "title": "Key Configured",
+            "type": "boolean"
+          },
+          "catalog_url": {
+            "title": "Catalog Url",
+            "type": "string"
+          },
+          "catalog_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Version"
+          },
+          "today": {
+            "format": "date",
+            "title": "Today",
+            "type": "string"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          },
+          "extensions": {
+            "items": {
+              "$ref": "#/$defs/ExtensionStatus"
+            },
+            "title": "Extensions",
+            "type": "array"
+          },
+          "chart_library": {
+            "$ref": "#/$defs/ChartLibraryStatus"
+          },
+          "session": {
+            "$ref": "#/$defs/SessionStatus"
+          },
+          "output_dir": {
+            "title": "Output Dir",
+            "type": "string"
+          },
+          "setup_command": {
+            "description": "Exact command that installs the DuckDB extensions for this server.",
+            "title": "Setup Command",
+            "type": "string"
+          },
+          "problems": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Problems",
+            "type": "array"
+          }
+        },
+        "required": [
+          "agent_version",
+          "duckdb_version",
+          "platform",
+          "key_configured",
+          "catalog_url",
+          "catalog_version",
+          "today",
+          "timezone",
+          "extensions",
+          "chart_library",
+          "session",
+          "output_dir",
+          "setup_command",
+          "problems"
+        ],
+        "title": "StatusOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    }
+  ]
+}

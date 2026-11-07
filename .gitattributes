@@ -1,0 +1,2 @@
+# Line endings are LF everywhere, on every OS (Git for Windows defaults to core.autocrlf=true).
+* text=auto eol=lf

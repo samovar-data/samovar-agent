@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# The repository gate: shared scans, then black, isort, flake8, strict mypy and pytest for server/ and scripts/,
+# and the contract with a local samovar-chart build when one is next to this repository.
+#   scripts/check            full gate
+#   scripts/check --lint-only  no tests
+#   scripts/check --fix        apply black and isort
+set -uo pipefail
+unset VIRTUAL_ENV
+
+lint_only=0
+fix=0
+for argument in "$@"; do
+    case "$argument" in
+        --lint-only) lint_only=1 ;;
+        --fix) fix=1 ;;
+        *) printf 'Usage: scripts/check [--lint-only] [--fix]\n' >&2; exit 2 ;;
+    esac
+done
+
+repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+server="$repo_root/server"
+run_uv() {
+    uv run --frozen --project "$server" --directory "$server" --group dev --extra test "$@"
+}
+script_files=("$repo_root"/scripts/*.py "$repo_root"/scripts/tests/*.py)
+
+if ((fix)); then
+    run_uv black --config pyproject.toml . "${script_files[@]}" && run_uv isort --settings-path pyproject.toml . "${script_files[@]}"
+    exit $?
+fi
+
+failed=0
+run_step() {
+    local label="$1"
+    shift
+    printf '%s ... ' "$label"
+    if "$@"; then
+        printf 'PASS\n'
+    else
+        printf 'FAIL (exit %s)\n' "$?"
+        failed=1
+    fi
+}
+
+run_step 'uv.lock up to date' uv lock --check --quiet --project "$server"
+run_step 'sql scan' python3 -B "$repo_root/scripts/sql_scan.py"
+run_step 'empty __init__.py' python3 -B "$repo_root/scripts/init_check.py"
+run_step 'script tests' env PYTHONPATH="$repo_root/scripts" python3 -B -m unittest discover -s "$repo_root/scripts/tests" -p 'test_*.py'
+run_step 'black --check' run_uv black --config pyproject.toml --check . "${script_files[@]}"
+run_step 'isort --check-only' run_uv isort --settings-path pyproject.toml --check-only . "${script_files[@]}"
+run_step 'flake8' run_uv flake8 --config .flake8 . "${script_files[@]}"
+run_step 'mypy (strict)' run_uv mypy
+run_step 'mypy scripts (strict)' run_uv mypy --strict "${script_files[@]}"
+run_step 'json schemas up to date' run_uv python -m samovar_dev.schemas "$repo_root/spec" --check
+chart_contract() {
+    # Development check against the neighbour samovar-chart build; skipped when it is not there.
+    local dist="$repo_root/../samovar-chart/dist"
+    if [[ ! -f "$dist/manifest.json" ]]; then
+        printf 'SKIP (no %s) ' "$dist"
+        return 0
+    fi
+    run_uv python -m samovar_dev.chart_contract "$dist"
+}
+if ((!lint_only)); then
+    run_step 'pytest' run_uv pytest tests -q
+    run_step 'chart contract (local samovar-chart dist)' chart_contract
+fi
+
+if ((failed)); then
+    printf 'Check failed.\n' >&2
+    exit 1
+fi
+printf 'All checks passed.\n'

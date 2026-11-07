@@ -1,0 +1,81 @@
+{
+  "duckdb_version": "v1.5.4",
+  "base_url": "https://extensions.duckdb.org",
+  "extensions": [
+    "httpfs",
+    "avro",
+    "iceberg"
+  ],
+  "files": {
+    "osx_arm64": {
+      "httpfs": {
+        "sha256": "b7e567bf2379e9deba534ac13684863ec84d0f47d96747240c87d4668fc4b491",
+        "size": 5534555
+      },
+      "avro": {
+        "sha256": "d3e01e0f4f5e5e9e053bc8b4555aafbf2aa1ce37eaf20742095e3f695f53cd0a",
+        "size": 2175479
+      },
+      "iceberg": {
+        "sha256": "cd83a3d5d05fc48ea28026bc9dfd2750fc8c435d92e8e34fb40b247e154c3ef5",
+        "size": 11371940
+      }
+    },
+    "osx_amd64": {
+      "httpfs": {
+        "sha256": "254cd1eb32f5ebb6d304f48409574b489213a9a0080d517d023b2a3716ab2a51",
+        "size": 5665706
+      },
+      "avro": {
+        "sha256": "c3b16ce12caf0a97c21fd10191cc0f5c5ac85773b5fdef910077f771113dcf3f",
+        "size": 2541574
+      },
+      "iceberg": {
+        "sha256": "ac90b8c8740a4e3d2ad361b8948ab751275e6908079f5e6640e958478b0af03d",
+        "size": 12236392
+      }
+    },
+    "linux_amd64": {
+      "httpfs": {
+        "sha256": "ce93281f076302cc9779de83bb7e4b615f9494966a38fbd295fb532fdb7104ad",
+        "size": 7388686
+      },
+      "avro": {
+        "sha256": "c7ff57a487acd0790c116c72144ea8d5a8f64bf8e70ca2c1ca1509dc58f3bbae",
+        "size": 3947296
+      },
+      "iceberg": {
+        "sha256": "92ab8783f73432e267f00d34e66e84891b5aa58b73c3c8cd49f24d363646b326",
+        "size": 17889869
+      }
+    },
+    "linux_arm64": {
+      "httpfs": {
+        "sha256": "6418402f13fb3d74da41de7aba5982fa2db7c64ec01989bd26e2f030610374f8",
+        "size": 7232836
+      },
+      "avro": {
+        "sha256": "ca496ae0e77c597a39a47d3e654e2f81f4858801ada19f6936782ceb32a9b1b2",
+        "size": 3519991
+      },
+      "iceberg": {
+        "sha256": "7fd0f550c8e280154387b42561c52ff2008b6c9e852ade1abbd2d85ae1f9cb55",
+        "size": 16441698
+      }
+    },
+    "windows_amd64": {
+      "httpfs": {
+        "sha256": "2466cad47fa8f0cb096b4976a70563cbd97f10f2782d455c21dbbc0cab5e69fb",
+        "size": 10316999
+      },
+      "avro": {
+        "sha256": "5421284de26bb08fd744ecaf5dec23b48589a34cccd3d68d2fb19e7ae5fd06f3",
+        "size": 7925567
+      },
+      "iceberg": {
+        "sha256": "71b49aee129a96d4d82e5ba38ae989587eb007028adca7d2024ddcacfe88d4b1",
+        "size": 9123319
+      }
+    }
+  }
+}

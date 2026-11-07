@@ -1,0 +1,21 @@
+# IDE
+.idea/
+.vscode/
+
+# Python / uv
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+build/
+dist/
+*.egg-info/
+
+# Generated locally
+evals/.fixture/
+samovar-output/
+server/samovar-output/
+
+# OS
+.DS_Store
