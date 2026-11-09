@@ -12,6 +12,13 @@ This skill holds only the way of working. What the data contains, what each tabl
 connected and what is excluded all come from `describe_data`, which reads the catalog the platform publishes.
 Never rely on memory or on a column's name when the description says otherwise.
 
+## Demo data
+
+If `describe_data` or `run_query` returns `data_mode: "demo"`, the data is a synthetic snapshot of a made-up tea shop,
+not the user's own. Say so at the start of the conversation and keep it visible in every answer (for example "demo
+data: ..."); never present demo numbers as the user's business results. To switch to their own data, follow the
+`samovar-setup` skill.
+
 ## Workflow
 
 1. **Understand the question.** Identify the metric, the period, the breakdown and any filter. Turn relative

@@ -21,6 +21,7 @@ def test_server_environment_passes_the_plugin_settings_and_data_folder() -> None
     names = {name.removeprefix(PREFIX) for name in SERVER["env"] if name.startswith(PREFIX)}
     assert names == {
         "DATA_DIR",
+        "DATA_MODE",
         "PLUGIN_ROOT",
         "S3_KEY_ID",
         "S3_SECRET",

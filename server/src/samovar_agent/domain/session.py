@@ -20,6 +20,8 @@ class DataSession:
     allowed_directories: tuple[str, ...]
     extensions: tuple[str, ...]
     s3: S3Access | None
+    demo_shift_days: int | None = None
+    """Demo snapshot only: how many days its dates are moved forward (the DuckDB variable `demo_shift_days`)."""
 
     def secrets(self) -> tuple[str, ...]:
         """Values that must never appear in tool output or logs."""

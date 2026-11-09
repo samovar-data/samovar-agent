@@ -25,6 +25,7 @@ UNSUBSTITUTED = "${"
 class DataMode(StrEnum):
     PLATFORM = "platform"
     FIXTURE = "fixture"
+    DEMO = "demo"
 
 
 @dataclass(frozen=True)
@@ -67,6 +68,10 @@ class Settings:
     @property
     def extension_dir(self) -> Path:
         return self.data_dir / "ext"
+
+    @property
+    def demo_dir(self) -> Path:
+        return self.data_dir / "demo"
 
     @property
     def chart_cache_dir(self) -> Path:

@@ -32,7 +32,13 @@ from samovar_agent.service.data_access import DataAccess
 from samovar_agent.service.data_day import DataDay
 from samovar_agent.service.filenames import output_name
 from samovar_agent.service.results import ResultStore
-from samovar_agent.settings import Limits
+from samovar_agent.settings import DataMode, Limits
+
+DEMO_MARK = "DEMO DATA"
+DEMO_NOTE = (
+    f"{DEMO_MARK}: synthetic sample data of a made-up tea shop, not the user's own; dates are moved so that the "
+    "latest day is yesterday. Say so in every answer."
+)
 
 
 @dataclass(frozen=True)
@@ -109,7 +115,9 @@ class AnalystService:
                     f"{source.title} ({source.code}): dt is the day in this source's own timezone, see each "
                     f"table's day_rule; `today` is the day in {zone.name}."
                     for source in catalog.sources
-                ],
+                ]
+                + ([DEMO_NOTE] if self._is_demo else []),
+                data_mode=self._data.mode,
                 data_access=access,
                 layers=catalog.layers,
                 tables=[
@@ -154,14 +162,15 @@ class AnalystService:
                 truncated=result.truncated,
                 elapsed_ms=raw.elapsed_ms,
                 catalog_version=result.catalog_version,
+                data_mode=self._data.mode,
             )
 
     def make_chart(self, query_id: str, spec: ChartSpec) -> MakeChartOutput:
         with self._lock:
             result = self._results.get(query_id)
             path = self._output_path(spec.title, query_id, "chart").with_suffix(".html")
-            self._charts.write(spec, result, footer(result), path)
-            return MakeChartOutput(query_id=query_id, path=str(path))
+            self._charts.write(spec, result, footer(result, self._is_demo), path)
+            return MakeChartOutput(query_id=query_id, path=str(path), data_mode=self._data.mode)
 
     def export(self, query_id: str, export_format: ExportFormat) -> ExportOutput:
         with self._lock:
@@ -172,13 +181,14 @@ class AnalystService:
             rows = [[json_value(value) for value in row] for row in raw.rows]
             self._writers[export_format](path, [name for name, _ in raw.columns], rows)
             sql_path = base.with_suffix(".sql")
-            sql_path.write_text(sql_file(stored), encoding="utf-8")
+            sql_path.write_text(sql_file(stored, self._is_demo), encoding="utf-8")
             return ExportOutput(
                 query_id=query_id,
                 path=str(path),
                 sql_path=str(sql_path),
                 row_count=len(rows),
                 truncated=raw.truncated,
+                data_mode=self._data.mode,
             )
 
     def status(self) -> StatusOutput:
@@ -228,18 +238,23 @@ class AnalystService:
             views=catalog.views() | frozenset(views),
         )
 
+    @property
+    def _is_demo(self) -> bool:
+        return self._data.mode == DataMode.DEMO
+
     def _output_path(self, title: str, query_id: str, fallback: str) -> Path:
         self._config.output_dir.mkdir(parents=True, exist_ok=True)
         return self._config.output_dir / output_name(title, query_id, fallback)
 
 
-def footer(result: StoredResult) -> str:
+def footer(result: StoredResult, demo: bool) -> str:
     created = f"{result.created_at:%Y-%m-%d %H:%M %Z}"
-    return f"Samovar Data · catalog {result.catalog_version} · query {result.query_id[:8]} · {created}"
+    mark = f"{DEMO_MARK} · " if demo else ""
+    return f"{mark}Samovar Data · catalog {result.catalog_version} · query {result.query_id[:8]} · {created}"
 
 
-def sql_file(result: StoredResult) -> str:
-    header = [
+def sql_file(result: StoredResult, demo: bool) -> str:
+    header = ([f"-- {DEMO_MARK}: synthetic sample data, not the user's own"] if demo else []) + [
         "-- " + " ".join(result.purpose.split()),
         f"-- catalog {result.catalog_version}; query {result.query_id}; {result.created_at.isoformat()}",
     ]

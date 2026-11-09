@@ -26,6 +26,12 @@ Follow these steps in order and stop at the first one that fails, explaining the
    Code stores the key and the secret in the system keychain. Never ask the user to paste the key or the secret into
    the chat, and never print them. If the storage refuses the key, it was mistyped, revoked or has expired (a key
    lives a year): a new one is created in the cabinet.
-4. **Verify.** Call `describe_data` first: `data_access` must be `ok` and the tables of the connected sources `available` (if it reports that
+   **Try it on demo data (no key, no registration).** If the user has no key yet and wants to see how the agent
+   works, set the plugin option "Data: platform or demo" (`/plugin`, the plugin's configuration) to `demo` and restart
+   Claude Code. The agent then downloads a public snapshot (about 3 MB, from `samovar-demo.s3.cloud.ru`, checked
+   against a pinned sha256, cached in the plugin data folder) of **synthetic** sample data: a made-up tea shop with
+   Yandex Metrika and amoCRM over 120 days, dates moved so that the latest day is yesterday. Tell the user plainly
+   that these are not their data. To use their own data, set the option back to `platform` and enter the key.
+4. **Verify.** Call `describe_data` first: `data_mode` is `demo` or `platform`, `data_access` must be `ok` and the tables of the connected sources `available` (if it reports that
    no data is published yet, there is nothing to fix on the user's side). Then call `status`: `problems` must be
    empty.

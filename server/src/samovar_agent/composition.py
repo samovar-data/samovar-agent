@@ -12,6 +12,7 @@ from types import MappingProxyType
 
 from mcp.server.mcpserver import MCPServer
 
+from samovar_agent.adapters.demo_session import DemoSessionProvider, DemoSnapshot
 from samovar_agent.adapters.dist_source import DirectoryDistSource, HttpDistSource
 from samovar_agent.adapters.document_source import document_source
 from samovar_agent.adapters.fixture_session import FixtureSessionProvider
@@ -48,6 +49,8 @@ API_TIMEOUT_SECONDS = 30.0
 API_MAX_BYTES = 8 * 1024 * 1024
 EXTENSION_TIMEOUT_SECONDS = 300.0
 EXTENSION_MAX_BYTES = 64 * 1024 * 1024
+DEMO_TIMEOUT_SECONDS = 120.0
+DEMO_MAX_BYTES = 32 * 1024 * 1024  # the snapshot is about 3 MB
 log = logging.getLogger(__name__)
 
 
@@ -61,10 +64,24 @@ class Application:
     redactor: Redactor
 
 
-SESSION_PROVIDERS: Mapping[DataMode, Callable[[Settings], DataSessionProvider]] = MappingProxyType(
+@dataclass(frozen=True)
+class SessionInputs:
+    settings: Settings
+    data_day: DataDay
+    http: HttpClient | None
+    demo_pin: DemoSnapshot | None
+
+
+SESSION_PROVIDERS: Mapping[DataMode, Callable[[SessionInputs], DataSessionProvider]] = MappingProxyType(
     {
-        DataMode.PLATFORM: lambda settings: S3KeySessionProvider(settings.s3_key),
-        DataMode.FIXTURE: lambda settings: FixtureSessionProvider(settings.fixture_dir or Path(".")),
+        DataMode.PLATFORM: lambda inputs: S3KeySessionProvider(inputs.settings.s3_key),
+        DataMode.FIXTURE: lambda inputs: FixtureSessionProvider(inputs.settings.fixture_dir or Path(".")),
+        DataMode.DEMO: lambda inputs: DemoSessionProvider(
+            inputs.demo_pin or DemoSnapshot.load(),
+            inputs.http or UrllibHttpClient(DEMO_TIMEOUT_SECONDS, DEMO_MAX_BYTES),
+            inputs.settings.demo_dir,
+            inputs.data_day,
+        ),
     }
 )
 
@@ -86,9 +103,10 @@ def build(
     http: HttpClient | None = None,
     engines: EngineFactory | None = None,
     chart_pin: DistPin | None = None,
+    demo_pin: DemoSnapshot | None = None,
 ) -> Application:
-    """Wires the application; `clock`, the catalog `http` client, `engines` and the chart library pin are replaced
-    only by tests."""
+    """Wires the application; `clock`, the catalog `http` client, `engines`, the chart library pin and the demo
+    snapshot pin are replaced only by tests."""
     queries = Queries.load()
     wall: Clock = clock or SystemClock()
     api_http = http or UrllibHttpClient(API_TIMEOUT_SECONDS, API_MAX_BYTES)
@@ -106,7 +124,7 @@ def build(
     limits = settings.limits
     guard = SqlGuard(SqlParser(queries), today)
     data = DataAccess(
-        SESSION_PROVIDERS[settings.data_mode](settings),
+        SESSION_PROVIDERS[settings.data_mode](SessionInputs(settings, data_day, http, demo_pin)),
         engines
         or EngineFactory(
             queries,
@@ -114,6 +132,7 @@ def build(
             EngineLimits(limits.memory_limit, limits.threads, limits.timeout_seconds),
             guard,
         ),
+        today,
     )
     pin = chart_pin or DistPin.load()
     dist_source = (

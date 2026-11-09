@@ -329,7 +329,7 @@
             "type": "array"
           },
           "notes": {
-            "description": "Facts to respect, one per source: in which timezone its days are.",
+            "description": "Facts to respect: one per source (its timezone), and in demo mode a DEMO DATA note.",
             "items": {
               "type": "string"
             },
@@ -343,6 +343,11 @@
             },
             "title": "Problems",
             "type": "array"
+          },
+          "data_mode": {
+            "description": "\"platform\", \"fixture\" or \"demo\": demo is synthetic sample data, not the user's own.",
+            "title": "Data Mode",
+            "type": "string"
           },
           "data_access": {
             "description": "\"ok\", or why the client data could not be opened (descriptions still apply).",
@@ -389,6 +394,7 @@
           "sources",
           "notes",
           "problems",
+          "data_mode",
           "data_access",
           "layers",
           "tables",
@@ -492,6 +498,11 @@
           "catalog_version": {
             "title": "Catalog Version",
             "type": "string"
+          },
+          "data_mode": {
+            "description": "\"platform\", \"fixture\" or \"demo\": demo is synthetic sample data, not the user's own.",
+            "title": "Data Mode",
+            "type": "string"
           }
         },
         "required": [
@@ -503,7 +514,8 @@
           "row_count",
           "truncated",
           "elapsed_ms",
-          "catalog_version"
+          "catalog_version",
+          "data_mode"
         ],
         "title": "RunQueryOutput",
         "type": "object"
@@ -647,11 +659,17 @@
             "description": "Self-contained HTML page with the interactive chart, the data and the SQL.",
             "title": "Path",
             "type": "string"
+          },
+          "data_mode": {
+            "description": "\"platform\", \"fixture\" or \"demo\": demo is synthetic sample data, not the user's own.",
+            "title": "Data Mode",
+            "type": "string"
           }
         },
         "required": [
           "query_id",
-          "path"
+          "path",
+          "data_mode"
         ],
         "title": "MakeChartOutput",
         "type": "object"
@@ -716,6 +734,11 @@
           "truncated": {
             "title": "Truncated",
             "type": "boolean"
+          },
+          "data_mode": {
+            "description": "\"platform\", \"fixture\" or \"demo\": demo is synthetic sample data, not the user's own.",
+            "title": "Data Mode",
+            "type": "string"
           }
         },
         "required": [
@@ -723,7 +746,8 @@
           "path",
           "sql_path",
           "row_count",
-          "truncated"
+          "truncated",
+          "data_mode"
         ],
         "title": "ExportOutput",
         "type": "object"

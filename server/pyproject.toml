@@ -1,6 +1,6 @@
 [project]
 name = "samovar-agent"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local MCP server for the Samovar Data analyst agent: data catalog, guarded DuckDB queries, ECharts charts and exports"
 license = "BUSL-1.1"
 requires-python = ">=3.12,<3.13"

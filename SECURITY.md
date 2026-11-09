@@ -43,6 +43,12 @@ version, the steps to reproduce and the impact. We acknowledge reports within a 
     (the pinned samovar-chart library in the `samovar-data-static` bucket);
   - while answering: the platform URL (`GET /api/v1/catalog`, public, no credentials sent) and the configured S3
     endpoint (`s3.cloud.ru` by default) with the S3 key.
+  - demo mode only (`SAMOVAR_DATA_MODE=demo`): `samovar-demo.s3.cloud.ru`, one anonymous `GET /mapping/<sha256>.duckdb`
+    (about 3 MB of synthetic data, public read on `mapping/*` only, no credentials sent). The file name and the sha256
+    are pinned in the plugin (`demo-snapshot.json`); the body is hashed before anything is written, a mismatch is
+    refused, the file is cached under its hash (atomic rename), re-checked on every start and attached read-only with
+    file access limited to that folder, no extensions and no S3. The size is limited to 32 MB. A new snapshot is a
+    new plugin version.
   The plugin's own HTTP client and the S3 endpoint accept HTTPS only (plain HTTP only to a loopback host, for local
   development); the HTTP client never follows redirects. Nothing else is sent anywhere.
 - **Personal data.** The platform loads only an allowlist of source fields and leaves personal data out; the

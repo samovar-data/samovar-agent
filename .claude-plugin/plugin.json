@@ -1,7 +1,7 @@
 {
   "name": "samovar-agent",
   "displayName": "Samovar Data analyst",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Ask questions about your Samovar Data in plain language: guarded DuckDB SQL over your detail and mart layers, tables, charts and CSV/JSON/XLSX exports.",
   "author": {
     "name": "Samovar Data",
@@ -12,6 +12,12 @@
   "license": "BUSL-1.1",
   "keywords": ["analytics", "duckdb", "yandex-metrika", "amocrm", "samovar-data"],
   "userConfig": {
+    "data_mode": {
+      "type": "string",
+      "title": "Data: platform or demo",
+      "description": "platform reads your own data with the S3 key below. demo needs no key: it downloads a public snapshot of synthetic sample data (a made-up tea shop) to try the plugin.",
+      "default": "platform"
+    },
     "s3_key_id": {
       "type": "string",
       "title": "S3 key: Access Key ID",

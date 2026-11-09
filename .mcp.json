@@ -16,6 +16,7 @@
         "UV_PROJECT_ENVIRONMENT": "${CLAUDE_PLUGIN_DATA}/venv",
         "SAMOVAR_DATA_DIR": "${CLAUDE_PLUGIN_DATA}",
         "SAMOVAR_PLUGIN_ROOT": "${CLAUDE_PLUGIN_ROOT}",
+        "SAMOVAR_DATA_MODE": "${user_config.data_mode}",
         "SAMOVAR_S3_KEY_ID": "${user_config.s3_key_id}",
         "SAMOVAR_S3_SECRET": "${user_config.s3_secret}",
         "SAMOVAR_S3_BUCKET": "${user_config.s3_bucket}",
