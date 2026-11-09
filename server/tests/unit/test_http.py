@@ -68,3 +68,9 @@ def test_plain_requests_still_work(servers: tuple[HTTPServer, HTTPServer]) -> No
 def test_only_https_or_loopback_http_is_allowed(url: str) -> None:
     with pytest.raises(ConfigurationError, match="non-HTTPS"):
         UrllibHttpClient(timeout_seconds=5, max_bytes=1000).request("GET", url, {})
+
+
+def test_an_answer_over_the_size_limit_is_an_error_with_the_limit_named(servers: tuple[HTTPServer, HTTPServer]) -> None:
+    _, target = servers
+    with pytest.raises(UpstreamError, match="larger than 1 bytes"):
+        UrllibHttpClient(timeout_seconds=5, max_bytes=1).request("GET", f"http://127.0.0.1:{target.server_port}/", {})

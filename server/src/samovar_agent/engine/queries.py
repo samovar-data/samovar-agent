@@ -31,6 +31,7 @@ class Queries:
     s3_endpoint: str
     secret: str
     serialize: str
+    set_demo_shift: str
     text_timestamps: str
     use: str
     views: str

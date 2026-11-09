@@ -98,3 +98,14 @@ def test_unknown_data_mode_is_a_configuration_error() -> None:
 def test_timezone_is_only_an_override() -> None:
     assert settings({}).timezone_override is None
     assert settings({"SAMOVAR_TIMEZONE": "Asia/Yekaterinburg"}).timezone_override == "Asia/Yekaterinburg"
+
+
+def test_demo_mode_is_chosen_explicitly_and_needs_no_key() -> None:
+    loaded = settings({"SAMOVAR_DATA_MODE": "demo"})
+    assert loaded.data_mode is DataMode.DEMO and loaded.s3_key is None
+    assert loaded.demo_dir == loaded.data_dir / "demo"
+
+
+def test_an_empty_key_does_not_switch_to_demo_and_an_unsubstituted_option_means_platform() -> None:
+    assert settings({}).data_mode is DataMode.PLATFORM
+    assert settings({"SAMOVAR_DATA_MODE": "${user_config.data_mode}"}).data_mode is DataMode.PLATFORM

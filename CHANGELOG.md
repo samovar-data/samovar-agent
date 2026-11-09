@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 (unreleased)
+
+- Demo mode (`SAMOVAR_DATA_MODE=demo`, plugin option "Data: platform or demo"): no key and no registration. The plugin
+  downloads a public snapshot of synthetic Samovar Data (a made-up tea shop: Yandex Metrika and amoCRM, 120 days) from
+  `samovar-demo.s3.cloud.ru`, checks its pinned sha256 before use, caches it in the plugin data folder, and moves its
+  dates so that the latest day is yesterday in the data's timezone. Tool results carry `data_mode`; in demo mode
+  `describe_data` adds a "DEMO DATA" note and the skills tell the user the data is synthetic.
+- Evals over the demo snapshot (four Metrika + amoCRM questions, run when `SAMOVAR_DEMO_SNAPSHOT` points to the file).
+
 ## 0.1.0 (unreleased)
 
 - Specification: JSON Schemas of the catalog fields the agent reads and of the MCP tools, generated from their

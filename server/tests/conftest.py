@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from samovar_agent.adapters.demo_session import DemoSnapshot
 from samovar_agent.composition import Application, build
 from samovar_agent.domain.catalog import Catalog
 from samovar_agent.engine.duckdb_engine import EngineFactory
@@ -48,11 +49,12 @@ def build_app(
     http: HttpClient | None = None,
     engines: EngineFactory | None = None,
     install_charts: bool = True,
+    demo_pin: DemoSnapshot | None = None,
 ) -> Application:
     """The real composition with the test clock and the stub chart library (installed unless told otherwise)."""
     assert settings.chart_dist_dir is not None
     pin = write_dist(settings.chart_dist_dir)
-    app = build(settings, lambda message: None, FixedClock(TODAY), http, engines, pin)
+    app = build(settings, lambda message: None, FixedClock(TODAY), http, engines, pin, demo_pin)
     if install_charts:
         app.chart_library.install()
     return app

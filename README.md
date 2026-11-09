@@ -24,6 +24,20 @@ a Codex plugin over the same server and a chat in the Samovar Data cabinet.
 - Описания таблиц и колонок в плагин не зашиты: они берутся из публичного каталога платформы
   (`/api/v1/catalog`, тот же документ, что показывает кабинет).
 
+## Try it without a key (demo data)
+
+Set the plugin option "Data: platform or demo" to `demo` (or `SAMOVAR_DATA_MODE=demo`) and ask a question. The plugin
+downloads a public snapshot (about 3 MB) of **synthetic** Samovar Data, a made-up tea shop with Yandex Metrika and
+amoCRM over 120 days, checks its sha256, keeps it in the plugin data folder (it then works offline) and moves its dates
+so that the latest day is yesterday. Answers are marked `data_mode: "demo"`. Example: *"Which campaign earns the most
+revenue per visit?"* Set the option back to `platform` and enter your S3 key to use your own data.
+
+Демо без ключа: выставьте опцию плагина «Data: platform or demo» в `demo` (или `SAMOVAR_DATA_MODE=demo`) и задайте
+вопрос. Плагин скачает открытый снимок (около 3 МБ) **синтетических** данных Samovar Data (вымышленный магазин чая:
+Яндекс Метрика и amoCRM за 120 дней), сверит sha256, сохранит его в папке данных плагина (дальше работает офлайн) и
+сдвинет даты так, чтобы последний день был вчерашним. Ответы помечены `data_mode: "demo"`. Для своих данных верните
+`platform` и введите S3-ключ.
+
 ## Install (Claude Code)
 
 Requirements: Claude Code, [uv](https://docs.astral.sh/uv/) on `PATH`.
@@ -59,6 +73,7 @@ Environment-only settings:
 | `SAMOVAR_TIMEOUT_SECONDS` | 30 | Query time limit |
 | `SAMOVAR_MEMORY_LIMIT` | `1GB` | DuckDB memory limit |
 | `SAMOVAR_THREADS` | 2 | DuckDB threads |
+| `SAMOVAR_DATA_MODE` | `platform` | `platform` (your S3 key) or `demo` (the public synthetic snapshot) |
 
 Then ask Claude to "set up samovar" (skill `samovar-setup`), which runs once:
 

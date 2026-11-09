@@ -194,6 +194,8 @@ class EngineFactory:
         attached = conn.execute(self._queries.attached).fetchone()
         if attached is None or not attached[1]:
             raise LockdownError("mapping is not attached read-only")
+        if session.demo_shift_days is not None:
+            conn.execute(render(self._queries.set_demo_shift, {"days": Integer(session.demo_shift_days)}))
         conn.execute(
             render(
                 self._queries.lock,
