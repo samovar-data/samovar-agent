@@ -6,12 +6,12 @@ traffic last week?" and get a checked SQL query, a table, a chart and an export 
 The agent is a local [MCP](https://modelcontextprotocol.io) server plus skills. MVP: a Claude Code plugin. Planned:
 a Codex plugin over the same server and a chat in the Samovar Data cabinet.
 
-> **Status: 0.1.0, pre-release.** The agent reads your data with your own read-only S3 key from the cabinet and the
+> **Status: 0.2.0, pre-release.** The agent reads your data with your own read-only S3 key from the cabinet and the
 > table descriptions from the platform's public catalog; the platform needs no change for it.
 
 ## Русский кратко
 
-- **Установка (локально):** `/plugin marketplace add /путь/к/samovar-agent`, затем `/plugin install samovar-agent@samovar-data`.
+- **Установка:** `/plugin marketplace add samovar-data/samovar-agent`, затем `/plugin install samovar-agent@samovar-data`.
   Нужен [uv](https://docs.astral.sh/uv/).
 - **Настройка:** администратор организации создаёт в кабинете Samovar Data S3-ключ только на чтение (раздел
   «S3-ключи»). При включении плагина введите Access Key ID, Secret Access Key и бакет этого ключа (ключ и секрет
@@ -43,7 +43,7 @@ revenue per visit?"* Set the option back to `platform` and enter your S3 key to 
 Requirements: Claude Code, [uv](https://docs.astral.sh/uv/) on `PATH`.
 
 ```text
-/plugin marketplace add /path/to/samovar-agent
+/plugin marketplace add samovar-data/samovar-agent
 /plugin install samovar-agent@samovar-data
 ```
 
