@@ -23,8 +23,8 @@ version, the steps to reproduce and the impact. We acknowledge reports within a 
   verifies their signatures.
 - **SQL guard.** Only one SELECT, parsed by DuckDB itself (the LIMIT-wrapped text is parsed again before it runs);
   only views listed by the catalog or present in the mapping; no file readers, settings, secret, variable or
-  environment functions; detail-layer queries must bound the table's day column with DATE literals, and the window
-  is limited.
+  environment functions; detail-layer queries must bound the table's day column with DATE literals (except
+  tables the catalog describes without a day column), and the window is limited.
 - **No secrets in output.** Tool results, errors and logs are redacted (the S3 key, credential fields, presigned
   URLs). Logs go to stderr.
 - **Charts.** The chart library (samovar-chart, ECharts inside) is downloaded only by `samovar-agent setup`, from the

@@ -34,6 +34,11 @@ data: ..."); never present demo numbers as the user's business results. To switc
 3. **Write one DuckDB SELECT** against the described views only, always schema-qualified (`<schema>.<view>` as
    listed). For detail-layer views, filter the table's day column in the WHERE of the same SELECT with DATE
    literals only (for example `dt BETWEEN DATE 'YYYY-MM-DD' AND DATE 'YYYY-MM-DD'`); the window is limited.
+   Versioned tables (such as Google Sheets: no `dt` in the table description) need no day bounds. Each row is one
+   version of a key at `_version_at` (the moment of reading the source); `deleted` marks that the key was gone then.
+   For the current state use the `<table>_current` view; for "the state at moment T" take, per key, the latest
+   version with `_version_at <= T` and drop the key if that version is `deleted`. Do not count or sum over all
+   versions of the table: that counts every change again.
 4. **Run it** with `run_query` and a short `purpose` in the user's words. If the guard refuses the query, read the
    message, fix the SQL and try again; never try to work around the guard.
 5. **Check the result** before answering: plausible row counts and totals, no unexpected empty groups,

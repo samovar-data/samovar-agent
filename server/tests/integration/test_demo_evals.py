@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 from samovar_agent.adapters.demo_session import DemoSessionProvider, DemoSnapshot
-from samovar_agent.domain.catalog import Catalog, LayerId
+from samovar_agent.domain.catalog import Catalog
 from samovar_agent.domain.values import json_value
 from samovar_agent.engine.duckdb_engine import EngineFactory, EngineLimits
 from samovar_agent.engine.parser import SqlParser
@@ -48,7 +48,7 @@ def test_every_demo_question_answers_as_recorded(catalog: Catalog, tmp_path: Pat
     guard = SqlGuard(SqlParser(queries), lambda: today.date())
     policy = GuardPolicy(
         window_days=Limits().dds_window_days,
-        date_columns={t.view: t.date_column for t in catalog.tables if t.layer is LayerId.DDS and t.date_column},
+        date_columns=catalog.date_columns(),
         views=catalog.views(),
     )
     engine = EngineFactory(queries, tmp_path / "ext", EngineLimits("1GB", 2, 30), guard).open(provider.open())

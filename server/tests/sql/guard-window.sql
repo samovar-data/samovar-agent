@@ -23,3 +23,13 @@ select * from dds.v as a join dds.w as b using (visit_id) where b.dt = date '202
 -- case: both tables filtered
 select * from dds.v as a join dds.w as b using (visit_id) where a.dt = date '2026-10-20' and b.dt = date '2026-10-20'
 -- case: empty
+-- case: versioned table without a day
+select * from dds.sheets where sheet_id = 'a'
+-- case: versioned current view without a day
+select * from dds.sheets_current
+-- case: detail table with a day and no bounds
+select * from dds.amocrm__leads
+-- case: unknown view
+select * from dds.other
+-- case: view only in the mapping
+select * from dds.mapped

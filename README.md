@@ -89,7 +89,8 @@ Example: *"How did visits change last week compared to the week before? Show a c
   which views the tenant's mapping has (whether the key may read them is the bucket policy's). Yandex Metrika and
   amoCRM are described; the day of each source is in its own timezone (the counter's, the account's).
 - `run_query` accepts one SELECT over `dds.*` (detail) and `mart.*` (daily marts) views, checked by DuckDB's own
-  parser; detail queries need a bounded day filter. DuckDB 1.5.4 runs locked (see [SECURITY.md](SECURITY.md)).
+  parser; detail queries need a bounded day filter (versioned tables without a `dt`
+  column, such as Google Sheets, are exempt). DuckDB 1.5.4 runs locked (see [SECURITY.md](SECURITY.md)).
 - `make_chart` turns a ChartSpec into one self-contained, interactive HTML page drawn by the samovar-chart library
   (published bundle: [samovar-chart 0.1.1](https://global.s3.cloud.ru/samovar-data-static/samovar-chart/0.1.1/manifest.json),
   Apache ECharts inside), inlined from the locally installed, sha256-checked copy under a strict CSP (no CDN): the

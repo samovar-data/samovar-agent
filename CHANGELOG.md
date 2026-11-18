@@ -2,6 +2,9 @@
 
 ## 0.2.0 (unreleased)
 
+- Versioned (SCD2) tables without a day column, such as Google Sheets: the SQL guard asks for no day bounds on
+  detail views the catalog lists without a `dt` day column (views only in the mapping still need `dt`); the `*_current` views are ordinary catalog views. The
+  analyst skill and the server instructions explain versions (`_version_at`, `deleted`, the state at a moment).
 - Demo mode (`SAMOVAR_DATA_MODE=demo`, plugin option "Data: platform or demo"): no key and no registration. The plugin
   downloads a public snapshot of synthetic Samovar Data (a made-up tea shop: Yandex Metrika and amoCRM, 120 days) from
   `samovar-demo.s3.cloud.ru`, checks its pinned sha256 before use, caches it in the plugin data folder, and moves its

@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from samovar_agent.adapters.fixture_session import FixtureSessionProvider
-from samovar_agent.domain.catalog import Catalog, LayerId
+from samovar_agent.domain.catalog import Catalog
 from samovar_agent.domain.errors import QueryRejected
 from samovar_agent.domain.values import json_value
 from samovar_agent.engine.duckdb_engine import Engine, EngineFactory, EngineLimits
@@ -64,7 +64,7 @@ class EvalRunner:
         self._guard = SqlGuard(SqlParser(queries), lambda: today)
         self._policy = GuardPolicy(
             window_days=int(self._document["window_days"]),
-            date_columns={t.view: t.date_column for t in catalog.tables if t.layer is LayerId.DDS and t.date_column},
+            date_columns=catalog.date_columns(),
             views=catalog.views(),
         )
         factory = EngineFactory(
