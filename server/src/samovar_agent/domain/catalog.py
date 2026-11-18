@@ -87,5 +87,9 @@ class Catalog(Lenient):
         """A table by id or by qualified view name."""
         return next((table for table in self.tables if ref in (table.id, table.view)), None)
 
+    def date_columns(self) -> dict[str, str | None]:
+        """The day column of each detail view, None for one without a day: the guard's only source for day bounds."""
+        return {table.view: table.date_column for table in self.tables if table.layer is LayerId.DDS}
+
     def views(self) -> frozenset[str]:
         return frozenset(table.view for table in self.tables)

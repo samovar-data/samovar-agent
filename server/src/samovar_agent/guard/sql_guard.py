@@ -7,8 +7,9 @@ are refused by the parser itself. The tree is then walked to allow only:
 - a short list of table functions that read nothing (range, generate_series, unnest);
 - scalar functions except a denylist (environment, settings, secret and variable readers).
 Queries over the detail layer (dds) must bound the table's day column with DATE literals in the WHERE of the same
-SELECT (computed bounds are refused), and the window between the bounds (or from the start to today) may not exceed
-the configured number of days.
+SELECT (tables the catalog lists without a day column, the versioned ones, are exempt; computed bounds are
+refused), and the window between the bounds (or from the start to today) may not exceed the configured number of
+days.
 """
 
 from collections.abc import Callable, Iterator, Mapping
@@ -37,7 +38,9 @@ class GuardPolicy:
     default_date_column: str = "dt"
     table_functions: frozenset[str] = frozenset({"range", "generate_series", "unnest"})
     denied_functions: frozenset[str] = DENIED_FUNCTIONS
-    date_columns: Mapping[str, str] = field(default_factory=dict)
+    date_columns: Mapping[str, str | None] = field(default_factory=dict)
+    """Day column per catalog detail view, None for a view with no day (versioned tables: no day bounds); a view
+    that is not listed (mapping only) gets `default_date_column`."""
     views: frozenset[str] = frozenset()
     """Known `schema.name` views; empty means any name in the allowed schemas."""
 
@@ -125,6 +128,8 @@ class SqlGuard:
                 continue
             view = f"{table.schema}.{table.name}"
             column = policy.date_columns.get(view, policy.default_date_column)
+            if column is None:
+                continue
             bounds = _bounds(select.get("where_clause"), column, table.qualifiers)
             if bounds.computed:
                 raise QueryRejected(

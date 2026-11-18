@@ -2,6 +2,7 @@ from datetime import date
 
 import pytest
 
+from samovar_agent.domain.catalog import Catalog
 from samovar_agent.domain.errors import QueryRejected
 from samovar_agent.engine.parser import SqlParser
 from samovar_agent.engine.queries import Queries
@@ -82,3 +83,36 @@ def test_each_detail_table_of_a_join_needs_its_own_day_filter(guard: SqlGuard) -
 
 def test_without_a_view_list_any_name_in_the_allowed_schemas_passes(guard: SqlGuard) -> None:
     guard.check(cases("guard-accepted")[0][1], GuardPolicy(window_days=31))
+
+
+def versioned_policy(catalog: Catalog) -> GuardPolicy:
+    """The policy the way the service builds it: a catalog with a versioned dds table and its current view."""
+    raw = catalog.model_dump(by_alias=True)
+    template = next(table for table in raw["tables"] if table["layer"] == "dds")
+    for name, partition in (("sheets", ["_run_id"]), ("sheets_current", [])):
+        raw["tables"].append({**template, "id": name, "view": f"dds.{name}", "partition": partition})
+    versioned = Catalog.model_validate(raw)
+    return GuardPolicy(window_days=31, date_columns=versioned.date_columns(), views=versioned.views())
+
+
+@pytest.mark.parametrize("case", ["versioned table without a day", "versioned current view without a day"])
+def test_catalog_tables_without_a_day_column_need_no_day_bounds(guard: SqlGuard, catalog: Catalog, case: str) -> None:
+    guard.check(WINDOW[case], versioned_policy(catalog))
+
+
+def test_detail_table_with_a_day_column_still_needs_bounds_next_to_versioned_ones(
+    guard: SqlGuard, catalog: Catalog
+) -> None:
+    with pytest.raises(QueryRejected, match="must filter dds.amocrm__leads by dt"):
+        guard.check(WINDOW["detail table with a day and no bounds"], versioned_policy(catalog))
+
+
+def test_view_only_in_the_mapping_still_needs_day_bounds_and_an_unknown_one_is_refused(
+    guard: SqlGuard, catalog: Catalog
+) -> None:
+    policy = versioned_policy(catalog)
+    mapped = GuardPolicy(window_days=31, date_columns=policy.date_columns, views=policy.views | {"dds.mapped"})
+    with pytest.raises(QueryRejected, match="must filter dds.mapped by dt"):
+        guard.check(WINDOW["view only in the mapping"], mapped)
+    with pytest.raises(QueryRejected, match="Unknown view dds.other"):
+        guard.check(WINDOW["unknown view"], policy)

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from samovar_agent.charts.dist import ChartLibrary
 from samovar_agent.charts.page import ChartPage
-from samovar_agent.domain.catalog import Catalog, LayerId
+from samovar_agent.domain.catalog import Catalog
 from samovar_agent.domain.chart import ChartSpec
 from samovar_agent.domain.errors import SamovarError
 from samovar_agent.domain.result import StoredResult
@@ -230,11 +230,7 @@ class AnalystService:
     def _policy(self, catalog: Catalog, views: tuple[str, ...]) -> GuardPolicy:
         return GuardPolicy(
             window_days=self._config.limits.dds_window_days,
-            date_columns={
-                table.view: table.date_column
-                for table in catalog.tables
-                if table.layer is LayerId.DDS and table.date_column
-            },
+            date_columns=catalog.date_columns(),
             views=catalog.views() | frozenset(views),
         )
 

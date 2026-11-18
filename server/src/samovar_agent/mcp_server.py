@@ -26,7 +26,8 @@ from samovar_agent.service.analyst import AnalystService
 SERVER_NAME = "samovar"
 INSTRUCTIONS = (
     "Samovar Data analyst tools over the client's own data. Always call describe_data first, write DuckDB SQL only "
-    "against the views it lists (detail-layer day bounds as DATE literals), show the SQL and the catalog version "
+    "against the views it lists (day bounds as DATE literals on tables with a dt column; versioned tables have none, "
+    "prefer their *_current views for the current state), show the SQL and the catalog version "
     "with every answer, and say plainly when the data cannot answer the question."
 )
 READ_ONLY = ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False)
